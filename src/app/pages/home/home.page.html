@@ -1,0 +1,94 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Prayer Times - Kamptee</ion-title>
+    <ion-buttons>
+      <ion-menu-button slot="start"></ion-menu-button>
+      <ion-button slot="end" (click)="copy()">
+        <ion-icon name="clipboard"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Prayer Data -->
+  <div *ngIf="prayerData" class="top-timings-banner counter-labels-inputs-wrapper ion-margin-bottom">
+    <div class="counter-label-input">
+      <div class="counter-label-arabic arabic">فجر</div>
+      <ion-label>F</ion-label>
+      <ion-text>{{dateFormatter(prayerData.timings.Fajr)}}</ion-text>
+    </div>
+    <div class="counter-label-input">
+      <div class="counter-label-arabic arabic">طلوع</div>
+      <ion-label>R</ion-label>
+      <ion-text>{{dateFormatter(prayerData.timings.Sunrise)}}</ion-text>
+    </div>
+    <div class="counter-label-input">
+      <div class="counter-label-arabic arabic">ظہر</div>
+      <ion-label>Z</ion-label>
+      <ion-text>{{dateFormatter(prayerData.timings.Dhuhr)}}</ion-text>
+    </div>
+    <div class="counter-label-input">
+      <div class="counter-label-arabic arabic">عصر</div>
+      <ion-label>A</ion-label>
+      <ion-text>{{dateFormatter(prayerData.timings.Asr)}}</ion-text>
+    </div>
+    <div class="counter-label-input">
+      <div class="counter-label-arabic arabic">مغرب</div>
+      <ion-label>M</ion-label>
+      <ion-text>{{dateFormatter(prayerData.timings.Maghrib)}}</ion-text>
+    </div>
+    <div class="counter-label-input">
+      <div class="counter-label-arabic arabic">عشاء</div>
+      <ion-label>I</ion-label>
+      <ion-text>{{dateFormatter(prayerData.timings.Isha)}}</ion-text>
+    </div>
+  </div>
+
+  <!-- Current Namaz -->
+  <div class="current-namaz"> {{currentNamaz}} </div>
+
+  <!-- Searchbar -->
+  <ion-searchbar placeholder="Search...تلاش" class="ion-no-padding arabic" [debounce]="300"
+    (ionInput)="filter($event)"></ion-searchbar>
+  <!-- Masjid Data -->
+  <div class="masjid" *ngFor="let masjid of filteredMasjids">
+    <div class="masjid-name-wrapper" (click)="sort()">
+      <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
+      <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>
+    </div>
+    <div class="counter-labels-inputs-wrapper">
+      <div class="counter-label-input" (click)="sort('F')">
+        <div class="counter-label-arabic arabic">فجر</div>
+        <ion-label>F</ion-label>
+        <ion-text>{{masjid.fajr}}</ion-text>
+      </div>
+      <div class="counter-label-input">
+        <div class="counter-label-arabic arabic">ظہر</div>
+        <ion-label>Z</ion-label>
+        <ion-text>{{masjid.zuhr}}</ion-text>
+      </div>
+      <div class="counter-label-input">
+        <div class="counter-label-arabic arabic">عصر</div>
+        <ion-label>A</ion-label>
+        <ion-text>{{masjid.asr}}</ion-text>
+      </div>
+      <div class="counter-label-input">
+        <div class="counter-label-arabic arabic">مغرب</div>
+        <ion-label>M</ion-label>
+        <ion-text>{{masjid.maghrib}}</ion-text>
+      </div>
+      <div class="counter-label-input">
+        <div class="counter-label-arabic arabic">عشاء</div>
+        <ion-label>I</ion-label>
+        <ion-text>{{masjid.isha}}</ion-text>
+      </div>
+      <div class="counter-label-input">
+        <div class="counter-label-arabic arabic">جمعہ</div>
+        <ion-label>J</ion-label>
+        <ion-text>{{masjid.jumaBayan}}</ion-text>
+        <ion-text>{{masjid.juma}}</ion-text>
+      </div>
+    </div>
+  </div>
+</ion-content>
