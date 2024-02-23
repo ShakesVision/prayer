@@ -1,5 +1,7 @@
 {
   "name": "prayer",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
