@@ -1,11 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Prayer Times - Kamptee</ion-title>
-    
-      <ion-menu-button slot="start"></ion-menu-button>
-      <ion-button slot="end" (click)="copy()" fill="clear" color="dark">
-        <ion-icon name="clipboard-outline" slot="icon-only"></ion-icon>
-      </ion-button>
+
+    <ion-menu-button slot="start"></ion-menu-button>
+    <ion-button slot="end" (click)="copy()" fill="clear" color="dark">
+      <ion-icon name="clipboard-outline" slot="icon-only"></ion-icon>
+    </ion-button>
   </ion-toolbar>
 </ion-header>
 
@@ -17,31 +17,14 @@
       <ion-label>{{prayer.enName}}</ion-label>
       <ion-text>{{prayer.time}}</ion-text>
     </div>
-    <!-- <div class="counter-label-input">
-      <div class="counter-label-arabic arabic">طلوع</div>
-      <ion-label>R</ion-label>
-      <ion-text>{{get12HoursFrom24Hours(prayerData.timings.Sunrise)}}</ion-text>
-    </div>
-    <div class="counter-label-input">
-      <div class="counter-label-arabic arabic">ظہر</div>
-      <ion-label>Z</ion-label>
-      <ion-text>{{get12HoursFrom24Hours(prayerData.timings.Dhuhr)}}</ion-text>
-    </div>
-    <div class="counter-label-input">
-      <div class="counter-label-arabic arabic">عصر</div>
-      <ion-label>A</ion-label>
-      <ion-text>{{get12HoursFrom24Hours(prayerData.timings.Asr)}}</ion-text>
-    </div>
-    <div class="counter-label-input">
-      <div class="counter-label-arabic arabic">مغرب</div>
-      <ion-label>M</ion-label>
-      <ion-text>{{get12HoursFrom24Hours(prayerData.timings.Maghrib)}}</ion-text>
-    </div>
-    <div class="counter-label-input">
-      <div class="counter-label-arabic arabic">عشاء</div>
-      <ion-label>I</ion-label>
-      <ion-text>{{get12HoursFrom24Hours(prayerData.timings.Isha)}}</ion-text>
-    </div> -->
+  </div>
+
+  <!-- Upcoming Jamaat Time -->
+  <div class="ion-text-center ion-margin-bottom">
+    <ion-button (click)="showUpcomingJamaatTimes()" color="danger" size="small">
+      <ion-icon slot="start" name="time-outline"></ion-icon>
+      See Upcoming Jamaat Times
+    </ion-button>
   </div>
 
   <!-- Current Namaz -->
@@ -90,4 +73,26 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal content -->
+  <ion-modal [isOpen]="isModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title class="arabic">{{getPrayerNameFromLetter(currentNamaz).en}}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="setOpen(false)">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="timing-item" *ngFor="let item of consolidatedList">
+          <h4> {{item.time}} </h4>
+          <ion-chip *ngFor="let m of item.masjids"> {{m}} </ion-chip>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
