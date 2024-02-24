@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { AlertController } from '@ionic/angular';
 import { map } from 'rxjs';
 import {
   ConsolidatedList,
@@ -27,9 +28,13 @@ export class HomePage implements OnInit {
 
   currentNamaz: Namaz = '';
   isModalOpen = false;
+  salahName: string = '';
   consolidatedList: ConsolidatedList[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private alertController: AlertController
+  ) {}
 
   ngOnInit() {
     this.fetchSheetData();
@@ -134,7 +139,7 @@ export class HomePage implements OnInit {
 
   filter(ev: any) {
     const query = ev.target.value.toLowerCase();
-    this.filteredMasjids = this.masjids.filter(
+    this.filteredMasjids = this.mapDataForUI(this.masjids).filter(
       (d) => d.masjid.toLowerCase().indexOf(query) > -1
     );
   }
@@ -262,7 +267,8 @@ export class HomePage implements OnInit {
       (time) => {
         return {
           time: time,
-          masjids: groupedData[time],
+          masjids: groupedData[time].sort(),
+          missed: this.hasThisTimePassed(time),
         };
       }
     );
@@ -270,21 +276,32 @@ export class HomePage implements OnInit {
     return consolidatedList;
   }
 
-  showUpcomingJamaatTimes() {
+  showUpcomingJamaatTimes(salahName?: any) {
+    salahName = this.getPrayerNameFromLetter(salahName ?? this.currentNamaz).en;
     this.consolidatedList = this.getConsolidatedList(
       this.filteredMasjids.filter((m) =>
         Object.values(m).every((value) => value !== '-')
       ),
-      this.getPrayerNameFromLetter(this.currentNamaz).en.toLowerCase()
-    );
+      salahName.toLowerCase()
+    ).sort((a, b) => (a.time > b.time ? 1 : -1));
     console.log(this.consolidatedList);
-    let print = '';
-    this.consolidatedList.forEach((item) => {
-      print += item.time + '\n';
-      print += item.masjids?.join(', ') + '\n';
-    });
-    // alert(print);
-    this.setOpen(true);
+    this.setOpen(true, salahName);
+  }
+
+  hasThisTimePassed(targetTime: string) {
+    const currentTime = new Date();
+    const [hours, minutes, meridiem] = targetTime.split(/:| /);
+    let targetHour = parseInt(hours);
+    const targetMinutes = parseInt(minutes);
+
+    if (meridiem.toLowerCase() === 'pm' && targetHour !== 12) {
+      targetHour += 12;
+    }
+
+    const targetDateTime = new Date();
+    targetDateTime.setHours(targetHour, targetMinutes, 0, 0);
+
+    return currentTime > targetDateTime;
   }
 
   copy() {
@@ -360,7 +377,18 @@ ${jumaString}
     `);
   }
 
-  setOpen(isOpen: boolean) {
+  setOpen(isOpen: boolean, salahName: string | null) {
     this.isModalOpen = isOpen;
+    this.salahName = salahName ?? this.currentNamaz;
+  }
+  async showAlert(message: string, header = '', subHeader = '') {
+    const alert = await this.alertController.create({
+      header,
+      subHeader,
+      message,
+      buttons: ['OK'],
+    });
+
+    await alert.present();
   }
 }

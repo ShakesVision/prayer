@@ -11,6 +11,7 @@ export interface Masjid {
 export interface ConsolidatedList {
   time: string;
   masjids: string[];
+  missed: boolean;
 }
 export type Namaz = 'F' | 'R' | 'X' | 'Z' | 'A' | 'M' | 'I' | '';
 export type NamazFull =

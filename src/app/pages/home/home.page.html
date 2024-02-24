@@ -9,90 +9,101 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <!-- Prayer Data -->
-  <div *ngIf="prayerData" class="top-timings-banner counter-labels-inputs-wrapper ion-margin-bottom">
-    <div *ngFor="let prayer of timings" class="counter-label-input" [ngClass]="{'active-prayer':prayer.active}">
-      <div class="counter-label-arabic arabic">{{prayer.urName}}</div>
-      <ion-label>{{prayer.enName}}</ion-label>
-      <ion-text>{{prayer.time}}</ion-text>
-    </div>
-  </div>
-
-  <!-- Upcoming Jamaat Time -->
-  <div class="ion-text-center ion-margin-bottom">
-    <ion-button (click)="showUpcomingJamaatTimes()" color="danger" size="small">
-      <ion-icon slot="start" name="time-outline"></ion-icon>
-      See Upcoming Jamaat Times
-    </ion-button>
-  </div>
-
-  <!-- Current Namaz -->
-  <!-- <div class="current-namaz ion-center"> {{getPrayerNameFromLetter(currentNamaz)['ur']}} </div> -->
-
-  <!-- Searchbar -->
-  <ion-searchbar placeholder="Search...تلاش" class="ion-no-padding arabic" [debounce]="300"
-    (ionInput)="filter($event)"></ion-searchbar>
-  <!-- Masjid Data -->
-  <div class="masjid" *ngFor="let masjid of filteredMasjids">
-    <div class="masjid-name-wrapper" (click)="sort()">
-      <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
-      <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>
-    </div>
-    <div class="counter-labels-inputs-wrapper">
-      <div class="counter-label-input" (click)="sort('F')">
-        <div class="counter-label-arabic arabic">فجر</div>
-        <ion-label>F</ion-label>
-        <ion-text>{{masjid.fajr}}</ion-text>
-      </div>
-      <div class="counter-label-input">
-        <div class="counter-label-arabic arabic">ظہر</div>
-        <ion-label>Z</ion-label>
-        <ion-text>{{masjid.zuhr}}</ion-text>
-      </div>
-      <div class="counter-label-input">
-        <div class="counter-label-arabic arabic">عصر</div>
-        <ion-label>A</ion-label>
-        <ion-text>{{masjid.asr}}</ion-text>
-      </div>
-      <div class="counter-label-input">
-        <div class="counter-label-arabic arabic">مغرب</div>
-        <ion-label>M</ion-label>
-        <ion-text>{{masjid.maghrib}}</ion-text>
-      </div>
-      <div class="counter-label-input">
-        <div class="counter-label-arabic arabic">عشاء</div>
-        <ion-label>I</ion-label>
-        <ion-text>{{masjid.isha}}</ion-text>
-      </div>
-      <div class="counter-label-input">
-        <div class="counter-label-arabic arabic">جمعہ</div>
-        <ion-label>J</ion-label>
-        <ion-text>{{masjid.jumaBayan}}</ion-text>
-        <ion-text>{{masjid.juma}}</ion-text>
+<ion-content>
+  <ion-progress-bar *ngIf="!prayerData || !filteredMasjids.length" type="indeterminate"
+    color="danger"></ion-progress-bar>
+  <div class="content-wrapper" class="ion-padding">
+    <!-- Prayer Data -->
+    <div *ngIf="prayerData" class="top-timings-banner counter-labels-inputs-wrapper ion-margin-bottom">
+      <div *ngFor="let prayer of timings" class="counter-label-input" [ngClass]="{'active-prayer':prayer.active}"
+        (click)="showUpcomingJamaatTimes(prayer.enName)">
+        <div class="counter-label-arabic arabic">{{prayer.urName}}</div>
+        <ion-label>{{prayer.enName}}</ion-label>
+        <ion-text>{{prayer.time}}</ion-text>
       </div>
     </div>
-  </div>
-
-  <!-- Modal content -->
-  <ion-modal [isOpen]="isModalOpen">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title class="arabic">{{getPrayerNameFromLetter(currentNamaz).en}}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="setOpen(false)">
-              <ion-icon name="close" slot="icon-only"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <div class="timing-item" *ngFor="let item of consolidatedList">
-          <h4> {{item.time}} </h4>
-          <ion-chip *ngFor="let m of item.masjids"> {{m}} </ion-chip>
+    <div *ngIf="filteredMasjids.length" class="masjid-data-wrapper">
+      <!-- Upcoming Jamaat Time -->
+      <div class="ion-text-center ion-margin-bottom">
+        <ion-button (click)="showUpcomingJamaatTimes()" color="danger" size="small">
+          <ion-icon slot="start" name="time-outline"></ion-icon>
+          See Upcoming Jamaat Times
+        </ion-button>
+      </div>
+      <!-- Searchbar -->
+      <ion-searchbar placeholder="Search...تلاش" class="ion-no-padding arabic" [debounce]="300"
+        (ionInput)="filter($event)"></ion-searchbar>
+      <!-- Masjid Data -->
+      <div class="masjid" *ngFor="let masjid of filteredMasjids">
+        <div class="masjid-name-wrapper" (click)="sort()">
+          <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
+          <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>
         </div>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+        <div class="counter-labels-inputs-wrapper">
+          <div class="counter-label-input" (click)="sort('F')">
+            <div class="counter-label-arabic arabic">فجر</div>
+            <ion-label>F</ion-label>
+            <ion-text>{{masjid.fajr}}</ion-text>
+          </div>
+          <div class="counter-label-input">
+            <div class="counter-label-arabic arabic">ظہر</div>
+            <ion-label>Z</ion-label>
+            <ion-text>{{masjid.zuhr}}</ion-text>
+          </div>
+          <div class="counter-label-input">
+            <div class="counter-label-arabic arabic">عصر</div>
+            <ion-label>A</ion-label>
+            <ion-text>{{masjid.asr}}</ion-text>
+          </div>
+          <div class="counter-label-input">
+            <div class="counter-label-arabic arabic">مغرب</div>
+            <ion-label>M</ion-label>
+            <ion-text>{{masjid.maghrib}}</ion-text>
+          </div>
+          <div class="counter-label-input">
+            <div class="counter-label-arabic arabic">عشاء</div>
+            <ion-label>I</ion-label>
+            <ion-text>{{masjid.isha}}</ion-text>
+          </div>
+          <div class="counter-label-input">
+            <div class="counter-label-arabic arabic">جمعہ</div>
+            <ion-label>J</ion-label>
+            <ion-text>{{masjid.jumaBayan}}</ion-text>
+            <ion-text>{{masjid.juma}}</ion-text>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal content -->
+    <ion-modal [isOpen]="isModalOpen">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>{{salahName}}</ion-title>
+            <ion-buttons slot="end">
+              <ion-button
+                (click)="showAlert('This is a consolidated list of Salah times in the masaajid. Time in RED indicates you have missed the takbeer-e-tahreema, while GREEN indicates you\'ll catch it - hurry!','Help')">
+                <ion-icon name="help-circle-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+              <ion-button (click)="setOpen(false,null)">
+                <ion-icon name="close" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <div class="timing-item" *ngFor="let item of consolidatedList">
+            <ion-text [color]="item.missed ? 'danger' : 'success'">
+              <h4 class="modal-timing-headings">
+                <span>{{item.time}}</span>
+                <ion-icon *ngIf="!item.missed" name="checkmark-circle-outline"></ion-icon>
+                <ion-icon *ngIf="item.missed" name="close-circle-outline"></ion-icon>
+              </h4>
+            </ion-text>
+            <ion-chip *ngFor="let m of item.masjids"> {{m}} </ion-chip>
+          </div>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
+  </div>
 </ion-content>
