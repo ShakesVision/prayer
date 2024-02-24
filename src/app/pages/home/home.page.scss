@@ -1,54 +1,61 @@
 .top-timings-banner {
-    background-color: var(--ion-color-warning);
+  background-color: var(--ion-color-warning);
+  border-radius: 4px;
+  .active-prayer {
+    background-color: var(--ion-color-dark);
+    color: var(--ion-color-light);
     border-radius: 4px;
-    .active-prayer {
-        background-color: var(--ion-color-dark);
-        color: var(--ion-color-light);
-    }
+  }
 }
 .masjid-name-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    color: var(--ion-color-danger);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--ion-color-danger);
 
-    .masjid-name-en {
-        font-size: small;
-        text-transform: uppercase;
-    }
+  .masjid-name-en {
+    font-size: small;
+    text-transform: uppercase;
+  }
 
-    .masjid-name-ur {
-        font-size: medium;
-    }
+  .masjid-name-ur {
+    font-size: medium;
+  }
 }
 
 .counter-labels-inputs-wrapper {
+  display: flex;
+  justify-content: space-evenly;
+
+  .counter-label-input {
     display: flex;
-    justify-content: space-evenly;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 15px 5px;
+    padding: 3px;
 
-    .counter-label-input {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        margin: 15px 5px;
-        padding: 3px;
-
-        .counter-label-arabic {
-            font-size: x-small;
-        }
-
-        ion-label {
-            font-size: large;
-            margin-bottom: 10px;
-        }
-
-        ion-text {
-            font-size: x-small;
-        }
+    .counter-label-arabic {
+      font-size: x-small;
     }
+
+    ion-label {
+      font-size: large;
+      margin-bottom: 10px;
+    }
+
+    ion-text {
+      font-size: x-small;
+    }
+  }
+}
+
+.modal-timing-headings {
+  display: flex;
+  align-items: center;
+  column-gap: 0.5rem;
 }
 
 .arabic {
-    font-size: x-small;
+  font-size: x-small;
 }
