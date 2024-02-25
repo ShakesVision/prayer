@@ -13,6 +13,11 @@ export interface ConsolidatedList {
   masjids: string[];
   missed: boolean;
 }
+export interface AppPages {
+  title: string;
+  url: 'help' | 'about' | 'playstore';
+  icon: string;
+}
 export type Namaz = 'F' | 'R' | 'X' | 'Z' | 'A' | 'M' | 'I' | '';
 export type NamazFull =
   | 'Fajr'

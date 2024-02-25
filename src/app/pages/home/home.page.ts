@@ -86,11 +86,24 @@ export class HomePage implements OnInit {
       if (timings.Dhuhr < now && now < timings.Asr) this.currentNamaz = 'Z';
       if (timings.Asr < now && now < timings.Maghrib) this.currentNamaz = 'A';
       if (timings.Maghrib < now && now < timings.Isha) this.currentNamaz = 'M';
-      if (timings.Isha < now) this.currentNamaz = 'I';
+      if (timings.Isha < now && now < this.convertToNextDay(timings.Fajr))
+        this.currentNamaz = 'I';
 
       console.log(this.currentNamaz);
       this.timings = this.prayerDataPresenter(requiredTimings);
     });
+  }
+  convertToNextDay(timeString: string) {
+    const [hoursStr, minutesStr] = timeString.split(':');
+    let hours = parseInt(hoursStr);
+
+    hours += 24;
+
+    // Format hours and minutes back into string format
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedTime = `${formattedHours}:${minutesStr}`;
+
+    return formattedTime;
   }
 
   prayerDataPresenter(timings: PrayerDataType[]) {
@@ -128,7 +141,9 @@ export class HomePage implements OnInit {
         fajr: this.dateFormatter(masjid.fajr),
         zuhr: this.dateFormatter(masjid.zuhr),
         asr: this.dateFormatter(masjid.asr),
-        maghrib: this.dateFormatter(masjid.maghrib),
+        maghrib: this.prayerData
+          ? this.get12HoursFrom24Hours(this.prayerData.timings.Sunset)
+          : this.dateFormatter(masjid.maghrib),
         isha: this.dateFormatter(masjid.isha),
         juma: this.dateFormatter(masjid.juma),
         jumaBayan: this.dateFormatter(masjid.jumaBayan, false),
@@ -284,7 +299,7 @@ export class HomePage implements OnInit {
       ),
       salahName.toLowerCase()
     ).sort((a, b) => (a.time > b.time ? 1 : -1));
-    console.log(this.consolidatedList);
+    console.log(salahName, this.consolidatedList);
     this.setOpen(true, salahName);
   }
 

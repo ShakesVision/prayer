@@ -24,7 +24,7 @@
     </div>
     <div *ngIf="filteredMasjids.length" class="masjid-data-wrapper">
       <!-- Upcoming Jamaat Time -->
-      <div class="ion-text-center ion-margin-bottom">
+      <div *ngIf="salahName || this.currentNamaz" class="ion-text-center ion-margin-bottom">
         <ion-button (click)="showUpcomingJamaatTimes()" color="danger" size="small">
           <ion-icon slot="start" name="time-outline"></ion-icon>
           See Upcoming Jamaat Times
