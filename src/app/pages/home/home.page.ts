@@ -319,7 +319,7 @@ export class HomePage implements OnInit {
     return currentTime > targetDateTime;
   }
 
-  copy() {
+  async copy() {
     const fajrString = this.masjids
       .map(
         (masjid) =>
@@ -362,34 +362,44 @@ export class HomePage implements OnInit {
           this.dateFormatter(masjid.jumaBayan)
       )
       .join('\n');
-    navigator.clipboard.writeText(`
-🌅 Fajr
-${fajrString}
-                          
-🌄 Tulu e Aftab         ${this.get12HoursFrom24Hours(
-      this.prayerData.timings.Sunrise
-    )}
-
-☀️ Zohar 
-${zuhrString}
-
-🌤️ Asr
-${asrString}
-
-🌅 Gurube Aftab     ${this.get12HoursFrom24Hours(
-      this.prayerData.timings.Sunset
-    )}
-
-🌠 Magrib              ${this.get12HoursFrom24Hours(
-      this.prayerData.timings.Sunset
-    )}
-
-🌌 Isha
-${ishaString}
-
-🕌 Juma
-${jumaString}
-    `);
+    const textToCopy = `
+      🌅 Fajr
+      ${fajrString}
+                                
+      🌄 Tulu e Aftab         ${this.get12HoursFrom24Hours(
+        this.prayerData.timings.Sunrise
+      )}
+      
+      ☀️ Zohar 
+      ${zuhrString}
+      
+      🌤️ Asr
+      ${asrString}
+      
+      🌅 Gurube Aftab     ${this.get12HoursFrom24Hours(
+        this.prayerData.timings.Sunset
+      )}
+      
+      🌠 Magrib              ${this.get12HoursFrom24Hours(
+        this.prayerData.timings.Sunset
+      )}
+      
+      🌌 Isha
+      ${ishaString}
+      
+      🕌 Juma
+      ${jumaString}
+          `;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      this.showAlert(
+        'Prayer timings with mosque names have been copied to the clipboard. Paste it wherever you want!',
+        'Copied successfully'
+      );
+    } catch (error: any) {
+      this.showAlert(error?.message, 'Error!');
+      console.error(error?.message);
+    }
   }
 
   setOpen(isOpen: boolean, salahName: string | null) {
