@@ -15,8 +15,13 @@
           </ion-menu-toggle>
         </ion-list>
 
-        <div *ngIf="lastUpdated !== ''" class="last-updated ion-padding">
-          <ion-label>{{ 'Last updated: ' + lastUpdated }}</ion-label>
+        <ion-item lines="none" class="darkWrapper">
+          <ion-toggle (ionChange)="changeTheme($event)" slot="end"></ion-toggle>
+          Dark mode
+        </ion-item>
+
+        <div *ngIf="lastUpdated !== ''" class="last-updated">
+          <ion-label>{{ 'App last updated: ' + lastUpdated }}</ion-label>
         </div>
       </ion-content>
     </ion-menu>
