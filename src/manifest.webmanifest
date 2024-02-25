@@ -1,8 +1,8 @@
 {
   "name": "Salah Time - Kamptee",
   "short_name": "Salah-KMT",
-  "theme_color": "#1976d2",
-  "background_color": "#fff",
+  "theme_color": "#fff",
+  "background_color": "#ffc409",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
