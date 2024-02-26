@@ -54,6 +54,7 @@ export class HomePage implements OnInit {
         this.filteredMasjids = this.mapDataForUI(data).sort((a, b) =>
           a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
         );
+        localStorage.setItem('masjids', JSON.stringify(this.masjids));
         console.log(this.filteredMasjids);
         // this.sort(this.currentNamaz);
       },
@@ -67,8 +68,20 @@ export class HomePage implements OnInit {
                 ? 1
                 : -1
             );
+            localStorage.setItem('masjids', JSON.stringify(this.masjids));
           },
           (err) => {
+            console.log(err);
+            const dataFromLocalStroage = localStorage.getItem('masjids');
+            if (dataFromLocalStroage) {
+              this.masjids = JSON.parse(dataFromLocalStroage);
+              this.filteredMasjids = this.mapDataForUI(this.masjids).sort(
+                (a, b) =>
+                  a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase()
+                    ? 1
+                    : -1
+              );
+            }
             this.showToast('Error getting the masaajid data. ');
           }
         );
