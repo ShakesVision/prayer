@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { map } from 'rxjs';
 import {
   ConsolidatedList,
@@ -33,7 +33,8 @@ export class HomePage implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
@@ -42,18 +43,37 @@ export class HomePage implements OnInit {
   }
 
   fetchSheetData() {
-    // const url = "https://script.google.com/macros/s/AKfycbzgdTLYd-4d47kxmsNxfOTqYE4gizk5VjEQXvpcjB-tNLFx_uUPWwVRRp7KTMaBXrRjIw/exec";
     const url =
+      'https://script.google.com/macros/s/AKfycbzgdTLYd-4d47kxmsNxfOTqYE4gizk5VjEQXvpcjB-tNLFx_uUPWwVRRp7KTMaBXrRjIw/exec';
+    const url2 =
       'https://script.google.com/macros/s/AKfycbxx1bALccf61Jz-wanrN5GRAtKvuMNmD74CO5GCWI0Mq4v-I_qFqg_lSxlvQXMbF3Y/exec';
-    this.http.get<Masjid[]>(url).subscribe((data) => {
-      console.log(data);
-      this.masjids = data;
-      this.filteredMasjids = this.mapDataForUI(data).sort((a, b) =>
-        a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
-      );
-      console.log(this.filteredMasjids);
-      // this.sort(this.currentNamaz);
-    });
+    this.http.get<Masjid[]>(url2).subscribe(
+      (data) => {
+        console.log(data);
+        this.masjids = data;
+        this.filteredMasjids = this.mapDataForUI(data).sort((a, b) =>
+          a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
+        );
+        console.log(this.filteredMasjids);
+        // this.sort(this.currentNamaz);
+      },
+      (err) => {
+        console.log(err);
+        this.http.get<Masjid[]>(url).subscribe(
+          (data) => {
+            this.masjids = data;
+            this.filteredMasjids = this.mapDataForUI(data).sort((a, b) =>
+              a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase()
+                ? 1
+                : -1
+            );
+          },
+          (err) => {
+            this.showToast('Error getting the masaajid data. ');
+          }
+        );
+      }
+    );
   }
   fetchPrayerData() {
     const dateInDdMmYyyy = new Date()
@@ -410,6 +430,15 @@ export class HomePage implements OnInit {
     const alert = await this.alertController.create({
       header,
       subHeader,
+      message,
+      buttons: ['OK'],
+    });
+
+    await alert.present();
+  }
+  async showToast(message: string, header = '') {
+    const alert = await this.toastController.create({
+      header,
       message,
       buttons: ['OK'],
     });

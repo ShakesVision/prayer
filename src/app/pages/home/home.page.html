@@ -10,8 +10,7 @@
 </ion-header>
 
 <ion-content>
-  <ion-progress-bar *ngIf="!prayerData || !filteredMasjids.length" type="indeterminate"
-    color="danger"></ion-progress-bar>
+  <ion-progress-bar *ngIf="!prayerData || !masjids.length" type="indeterminate" color="danger"></ion-progress-bar>
   <div class="content-wrapper" class="ion-padding">
     <!-- Prayer Data -->
     <div *ngIf="prayerData" class="top-timings-banner counter-labels-inputs-wrapper ion-margin-bottom">
@@ -22,7 +21,7 @@
         <ion-text>{{prayer.time}}</ion-text>
       </div>
     </div>
-    <div *ngIf="filteredMasjids.length" class="masjid-data-wrapper">
+    <div *ngIf="masjids.length" class="masjid-data-wrapper">
       <!-- Upcoming Jamaat Time -->
       <div *ngIf="this.currentNamaz" class="ion-text-center ion-margin-bottom">
         <ion-button (click)="showUpcomingJamaatTimes()" color="danger" size="small">

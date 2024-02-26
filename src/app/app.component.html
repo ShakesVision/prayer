@@ -21,7 +21,8 @@
         </ion-item>
 
         <div *ngIf="lastUpdated !== ''" class="last-updated">
-          <ion-label>{{ 'App last updated: ' + lastUpdated }}</ion-label>
+          <ion-label>App last updated: </ion-label>
+          <ion-label [innerHTML]="lastUpdated" style="font-style: italic;"></ion-label>
         </div>
       </ion-content>
     </ion-menu>

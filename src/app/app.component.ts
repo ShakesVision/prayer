@@ -91,7 +91,9 @@ export class AppComponent {
       (response: any) => {
         if (response.length > 0) {
           const lastCommitTime = response[0].commit.author.date;
-          this.lastUpdated = new Date(lastCommitTime).toLocaleString();
+          this.lastUpdated = `${new Date(lastCommitTime).toLocaleString()}
+            <br>
+            (${response[0].commit.message})`;
         } else {
           this.lastUpdated = '';
         }
