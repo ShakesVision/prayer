@@ -59,7 +59,7 @@
   "shortcuts": [
     {
       "name": "About",
-      "url": "/dynamic-content",
+      "url": "/info/help",
       "description": "About the app and the developer"
     }
   ]

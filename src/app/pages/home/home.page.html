@@ -29,11 +29,20 @@
           See Upcoming Jamaat Times
         </ion-button>
       </div>
+
+      <!-- List of Favorite masjids -->
+      <div class="masjid" *ngFor="let fav of favMasjids">
+        {{fav.masjid}} <br>
+        {{fav.fajr}} <br>
+        {{fav.zuhr}} <br>
+        {{fav.asr}} <br>
+      </div>
       <!-- Searchbar -->
       <ion-searchbar placeholder="Search...تلاش" class="ion-no-padding arabic" [debounce]="300"
         (ionInput)="filter($event)"></ion-searchbar>
       <!-- Masjid Data -->
-      <div class="masjid" *ngFor="let masjid of filteredMasjids">
+      <div class="masjid" *ngFor="let masjid of filteredMasjids" long-press (longPress)="onLongPress()">
+        <ion-icon class="favorite-icon" name="bookmark" color="danger" (click)="fav(masjid)"></ion-icon>
         <div class="masjid-name-wrapper" (click)="sort()">
           <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
           <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>

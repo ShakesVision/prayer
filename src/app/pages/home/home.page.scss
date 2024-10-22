@@ -59,3 +59,13 @@
 .arabic {
   font-size: x-small;
 }
+
+.masjid {
+  position: relative;
+}
+.favorite-icon {
+  position: absolute;
+  right: -0.5rem;
+  top: 3.5rem;
+  rotate: 45deg;
+}

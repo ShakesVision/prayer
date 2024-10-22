@@ -8,7 +8,7 @@ const routes: Routes = [
       import('./pages/home/home.module').then((m) => m.HomePageModule),
   },
   {
-    path: 'dynamic-content',
+    path: 'info/:page',
     loadChildren: () =>
       import('./pages/dynamic-content/dynamic-content.module').then(
         (m) => m.DynamicContentPageModule

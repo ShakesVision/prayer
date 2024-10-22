@@ -31,11 +31,14 @@ export class HomePage implements OnInit {
   salahName: string = '';
   consolidatedList: ConsolidatedList[] = [];
 
+  favMasjidNames: string[] = [];
+  favMasjids: Masjid[] = [];
+
   constructor(
     private http: HttpClient,
     private alertController: AlertController,
     private toastController: ToastController
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.fetchSheetData();
@@ -55,6 +58,8 @@ export class HomePage implements OnInit {
           a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
         );
         localStorage.setItem('masjids', JSON.stringify(this.masjids));
+        this.getFavMasjidsAndRender();
+
         console.log(this.filteredMasjids);
         // this.sort(this.currentNamaz);
       },
@@ -75,6 +80,8 @@ export class HomePage implements OnInit {
             const dataFromLocalStroage = localStorage.getItem('masjids');
             if (dataFromLocalStroage) {
               this.masjids = JSON.parse(dataFromLocalStroage);
+              this.getFavMasjidsAndRender();
+
               this.filteredMasjids = this.mapDataForUI(this.masjids).sort(
                 (a, b) =>
                   a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase()
@@ -125,6 +132,11 @@ export class HomePage implements OnInit {
       console.log(this.currentNamaz);
       this.timings = this.prayerDataPresenter(requiredTimings);
     });
+  }
+  getFavMasjidsAndRender() {
+    const favData = localStorage.getItem('fav');
+    this.favMasjidNames = favData ? JSON.parse(favData) : [];
+    this.favMasjids = this.mapDataForUI(this.masjids.filter(m => this.favMasjidNames.includes(m.masjid)));
   }
   convertToNextDay(timeString: string) {
     const [hoursStr, minutesStr] = timeString.split(':');
@@ -395,32 +407,32 @@ export class HomePage implements OnInit {
           this.dateFormatter(masjid.jumaBayan)
       )
       .join('\n');
-    const textToCopy = `
-      🌅 Fajr
+
+    const textToCopy = `🌅 Fajr
       ${fajrString}
-                                
-      🌄 Tulu e Aftab         ${this.get12HoursFrom24Hours(
-        this.prayerData.timings.Sunrise
-      )}
+
+🌄 Tulu e Aftab         ${this.get12HoursFrom24Hours(
+      this.prayerData.timings.Sunrise
+    )}
       
-      ☀️ Zohar 
+☀️ Zohar 
       ${zuhrString}
-      
-      🌤️ Asr
+
+🌤️ Asr
       ${asrString}
-      
-      🌅 Gurube Aftab     ${this.get12HoursFrom24Hours(
-        this.prayerData.timings.Sunset
-      )}
-      
-      🌠 Magrib              ${this.get12HoursFrom24Hours(
-        this.prayerData.timings.Sunset
-      )}
-      
-      🌌 Isha
+
+🌅 Gurube Aftab     ${this.get12HoursFrom24Hours(
+      this.prayerData.timings.Sunset
+    )}
+
+🌠 Magrib              ${this.get12HoursFrom24Hours(
+      this.prayerData.timings.Sunset
+    )}
+
+🌌 Isha
       ${ishaString}
-      
-      🕌 Juma
+
+🕌 Juma
       ${jumaString}
           `;
     try {
@@ -449,6 +461,7 @@ export class HomePage implements OnInit {
 
     await alert.present();
   }
+
   async showToast(message: string, header = '') {
     const alert = await this.toastController.create({
       header,
@@ -457,5 +470,31 @@ export class HomePage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  onLongPress() {
+    console.log('Long press detected!');
+    // Implement your logic here
+  }
+
+  addOrRemove(arr: string[], value: string): string[] {
+    if (arr.includes(value)) {
+      return arr.filter(item => item !== value);
+    } else {
+      return [...arr, value];
+    }
+  }
+
+  fav(masjid: Masjid) {
+    // Favorite the item. If already favorited, remove from the fav list.
+    console.log('before:favMasjids', this.favMasjidNames);
+    this.favMasjidNames = this.addOrRemove(this.favMasjidNames, masjid.masjid);
+    console.log(this.favMasjidNames);
+    localStorage.setItem('fav', JSON.stringify(this.favMasjidNames));
+    this.getFavMasjidsAndRender();
+  }
+
+  getMasjidDataFromName(name: string) {
+    return this.masjids.find(m => m.masjid === name);
   }
 }

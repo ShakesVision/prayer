@@ -26,7 +26,7 @@ export class AppComponent {
     let navigationExtras: NavigationExtras = {
       state: { pageTitle, htmlContent },
     };
-    this.router.navigate(['dynamic-content'], navigationExtras);
+    this.router.navigate(['info', pageTitle.toLowerCase()], navigationExtras);
   }
   gotopage(url: AppPages['url']) {
     let pageTitle = '';
