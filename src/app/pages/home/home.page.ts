@@ -8,6 +8,7 @@ import {
   Namaz,
   PrayerDataType,
 } from 'src/app/models/common';
+import { MasjidServiceService } from 'src/app/services/masjid-service.service';
 
 @Component({
   selector: 'app-home',
@@ -37,7 +38,8 @@ export class HomePage implements OnInit {
   constructor(
     private http: HttpClient,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private mService: MasjidServiceService
   ) { }
 
   ngOnInit() {
@@ -54,13 +56,9 @@ export class HomePage implements OnInit {
       (data) => {
         console.log(data);
         this.masjids = data;
-        this.filteredMasjids = this.mapDataForUI(data).sort((a, b) =>
-          a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
-        );
-        localStorage.setItem('masjids', JSON.stringify(this.masjids));
         this.getFavMasjidsAndRender();
-
-        console.log(this.filteredMasjids);
+        this.updateFilteredMasjid();
+        localStorage.setItem('masjids', JSON.stringify(this.masjids));
         // this.sort(this.currentNamaz);
       },
       (err) => {
@@ -68,11 +66,7 @@ export class HomePage implements OnInit {
         this.http.get<Masjid[]>(url).subscribe(
           (data) => {
             this.masjids = data;
-            this.filteredMasjids = this.mapDataForUI(data).sort((a, b) =>
-              a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase()
-                ? 1
-                : -1
-            );
+            this.updateFilteredMasjid();
             localStorage.setItem('masjids', JSON.stringify(this.masjids));
           },
           (err) => {
@@ -81,13 +75,7 @@ export class HomePage implements OnInit {
             if (dataFromLocalStroage) {
               this.masjids = JSON.parse(dataFromLocalStroage);
               this.getFavMasjidsAndRender();
-
-              this.filteredMasjids = this.mapDataForUI(this.masjids).sort(
-                (a, b) =>
-                  a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase()
-                    ? 1
-                    : -1
-              );
+              this.updateFilteredMasjid();
             }
             this.showToast('Error getting the masaajid data. ');
           }
@@ -136,7 +124,20 @@ export class HomePage implements OnInit {
   getFavMasjidsAndRender() {
     const favData = localStorage.getItem('fav');
     this.favMasjidNames = favData ? JSON.parse(favData) : [];
-    this.favMasjids = this.mapDataForUI(this.masjids.filter(m => this.favMasjidNames.includes(m.masjid)));
+    // Append isFav record with every masjid to track the bookmarks.
+    this.masjids = this.masjids.map(m => {
+      return {
+        ...m,
+        isFav: this.favMasjidNames.includes(m.masjid)
+      }
+    });
+    // Map favorite masjids for UI.
+    let favMasjidData = this.masjids.filter(m => this.favMasjidNames.includes(m.masjid));
+
+    this.favMasjids = this.mapDataForUI(favMasjidData);
+    this.filteredMasjids = this.mapDataForUI(this.masjids).sort((a, b) =>
+      a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
+    );
   }
   convertToNextDay(timeString: string) {
     const [hoursStr, minutesStr] = timeString.split(':');
@@ -179,6 +180,12 @@ export class HomePage implements OnInit {
     return prayerMapping[prayer];
   }
 
+  updateFilteredMasjid() {
+    this.filteredMasjids = this.mapDataForUI(this.masjids).sort((a, b) =>
+      a.masjid.toLocaleLowerCase() > b.masjid.toLocaleLowerCase() ? 1 : -1
+    );
+  }
+
   mapDataForUI(data: Masjid[]) {
     data = data.map((masjid) => {
       return {
@@ -192,6 +199,7 @@ export class HomePage implements OnInit {
         isha: this.dateFormatter(masjid.isha),
         juma: this.dateFormatter(masjid.juma),
         jumaBayan: this.dateFormatter(masjid.jumaBayan, false),
+        isFav: masjid.isFav
       };
     });
     return data;
@@ -256,12 +264,6 @@ export class HomePage implements OnInit {
     });
   }
 
-  getMasjidName(name: string, lang: 'en' | 'ur') {
-    return lang === 'en'
-      ? name?.split('-')[0]?.trim()
-      : name?.split('-')[1]?.trim();
-  }
-
   getPrayerNameFromLetter(input: Namaz) {
     switch (input) {
       case 'F':
@@ -315,7 +317,7 @@ export class HomePage implements OnInit {
 
     data.forEach((item: any) => {
       const time = item[propertyName];
-      const masjidName = this.getMasjidName(item.masjid, 'en');
+      const masjidName = this.mService.getMasjidName(item.masjid, 'en');
       if (groupedData[time]) {
         groupedData[time].push(masjidName);
       } else {
@@ -368,7 +370,7 @@ export class HomePage implements OnInit {
     const fajrString = this.masjids
       .map(
         (masjid) =>
-          this.getMasjidName(masjid.masjid, 'en') +
+          this.mService.getMasjidName(masjid.masjid, 'en') +
           '   ' +
           this.dateFormatter(masjid.fajr)
       )
@@ -376,7 +378,7 @@ export class HomePage implements OnInit {
     const zuhrString = this.masjids
       .map(
         (masjid) =>
-          this.getMasjidName(masjid.masjid, 'en') +
+          this.mService.getMasjidName(masjid.masjid, 'en') +
           '   ' +
           this.dateFormatter(masjid.zuhr)
       )
@@ -384,7 +386,7 @@ export class HomePage implements OnInit {
     const asrString = this.masjids
       .map(
         (masjid) =>
-          this.getMasjidName(masjid.masjid, 'en') +
+          this.mService.getMasjidName(masjid.masjid, 'en') +
           '   ' +
           this.dateFormatter(masjid.asr)
       )
@@ -392,7 +394,7 @@ export class HomePage implements OnInit {
     const ishaString = this.masjids
       .map(
         (masjid) =>
-          this.getMasjidName(masjid.masjid, 'en') +
+          this.mService.getMasjidName(masjid.masjid, 'en') +
           '   ' +
           this.dateFormatter(masjid.isha)
       )
@@ -400,7 +402,7 @@ export class HomePage implements OnInit {
     const jumaString = this.masjids
       .map(
         (masjid) =>
-          this.getMasjidName(masjid.masjid, 'en') +
+          this.mService.getMasjidName(masjid.masjid, 'en') +
           '   ' +
           this.dateFormatter(masjid.juma) +
           '\nJuma Bayan    ' +
@@ -487,9 +489,7 @@ export class HomePage implements OnInit {
 
   fav(masjid: Masjid) {
     // Favorite the item. If already favorited, remove from the fav list.
-    console.log('before:favMasjids', this.favMasjidNames);
     this.favMasjidNames = this.addOrRemove(this.favMasjidNames, masjid.masjid);
-    console.log(this.favMasjidNames);
     localStorage.setItem('fav', JSON.stringify(this.favMasjidNames));
     this.getFavMasjidsAndRender();
   }

@@ -30,91 +30,18 @@
         </ion-button>
       </div>
 
-      <p class="ion-text-center" style="font-size: x-small;" *ngIf="favMasjids.length">Your favorite: <span class="fancy-number">{{favMasjids.length}}</span></p>
+      <p class="ion-text-center" style="font-size: x-small;" *ngIf="favMasjids.length">Your favorites: <span class="fancy-number">{{favMasjids.length}}</span></p>
 
-      <!-- List of Favorite masjids -->
+      <!-- List of Favorite Masjids -->
       <div class="favmasjid" *ngFor="let masjid of favMasjids">
-        <div class="masjid-name-wrapper" (click)="sort()">
-          <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
-          <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>
-        </div>
-        <div class="counter-labels-inputs-wrapper">
-          <div class="counter-label-input" (click)="sort('F')">
-            <div class="counter-label-arabic arabic">فجر</div>
-            <ion-label>F</ion-label>
-            <ion-text>{{masjid.fajr}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">ظہر</div>
-            <ion-label>Z</ion-label>
-            <ion-text>{{masjid.zuhr}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">عصر</div>
-            <ion-label>A</ion-label>
-            <ion-text>{{masjid.asr}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">مغرب</div>
-            <ion-label>M</ion-label>
-            <ion-text>{{masjid.maghrib}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">عشاء</div>
-            <ion-label>I</ion-label>
-            <ion-text>{{masjid.isha}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">جمعہ</div>
-            <ion-label>J</ion-label>
-            <ion-text>{{masjid.jumaBayan}}</ion-text>
-            <ion-text>{{masjid.juma}}</ion-text>
-          </div>
-        </div>
+        <masjid-entry [masjid]="masjid" (onMasjidNameClick)="sort()" (onFavIconClick)="fav(masjid)"></masjid-entry>
       </div>
       <!-- Searchbar -->
       <ion-searchbar placeholder="Search...تلاش" class="ion-no-padding arabic" [debounce]="300"
         (ionInput)="filter($event)"></ion-searchbar>
-      <!-- Masjid Data -->
+      <!-- List of Masjids -->
       <div class="masjid" *ngFor="let masjid of filteredMasjids" long-press (longPress)="onLongPress()">
-        <ion-icon class="favorite-icon" name="bookmark" color="danger" (click)="fav(masjid)"></ion-icon>
-        <div class="masjid-name-wrapper" (click)="sort()">
-          <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
-          <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>
-        </div>
-        <div class="counter-labels-inputs-wrapper">
-          <div class="counter-label-input" (click)="sort('F')">
-            <div class="counter-label-arabic arabic">فجر</div>
-            <ion-label>F</ion-label>
-            <ion-text>{{masjid.fajr}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">ظہر</div>
-            <ion-label>Z</ion-label>
-            <ion-text>{{masjid.zuhr}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">عصر</div>
-            <ion-label>A</ion-label>
-            <ion-text>{{masjid.asr}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">مغرب</div>
-            <ion-label>M</ion-label>
-            <ion-text>{{masjid.maghrib}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">عشاء</div>
-            <ion-label>I</ion-label>
-            <ion-text>{{masjid.isha}}</ion-text>
-          </div>
-          <div class="counter-label-input">
-            <div class="counter-label-arabic arabic">جمعہ</div>
-            <ion-label>J</ion-label>
-            <ion-text>{{masjid.jumaBayan}}</ion-text>
-            <ion-text>{{masjid.juma}}</ion-text>
-          </div>
-        </div>
+        <masjid-entry [masjid]="masjid" (onMasjidNameClick)="sort()" (onFavIconClick)="fav(masjid)"></masjid-entry>
       </div>
     </div>
     <!-- Modal content -->

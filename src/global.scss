@@ -30,3 +30,31 @@
 .arabic {
     font-family: "Noto Nastaliq Urdu", Times, "Times New Roman", serif;
 }
+
+.counter-labels-inputs-wrapper {
+    display: flex;
+    justify-content: space-evenly;
+
+    .counter-label-input {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 15px 5px;
+        padding: 3px;
+
+        .counter-label-arabic {
+            font-size: x-small;
+        }
+
+        ion-label {
+            font-size: large;
+            margin-bottom: 10px;
+        }
+
+        ion-text {
+            font-size: x-small;
+        }
+    }
+}
+

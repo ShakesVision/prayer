@@ -1,0 +1,30 @@
+.masjid-outer-wrapper {
+    position: relative;
+}
+
+.favorite-icon {
+    position: absolute;
+    right: -0.5rem;
+    top: 3.5rem;
+    rotate: 45deg;
+}
+
+.masjid-name-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    color: var(--ion-color-danger);
+
+    .masjid-name-en {
+        font-size: small;
+        text-transform: uppercase;
+    }
+
+    .masjid-name-ur {
+        font-size: medium;
+    }
+}
+
+.arabic {
+    font-size: x-small;
+}

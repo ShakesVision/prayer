@@ -7,6 +7,7 @@ export interface Masjid {
   isha: string;
   juma: string;
   jumaBayan: string;
+  isFav?: boolean;
 }
 export interface ConsolidatedList {
   time: string;
