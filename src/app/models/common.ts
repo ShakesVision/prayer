@@ -43,4 +43,5 @@ export interface timeEntry {
   urLabel: string;
   enLabel: string;
   time: string;
+  secondaryTime?: string;
 }

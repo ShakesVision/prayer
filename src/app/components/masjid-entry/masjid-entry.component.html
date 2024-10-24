@@ -1,15 +1,17 @@
 <div class="masjid-outer-wrapper">
-  <ion-icon class="favorite-icon" [name]="masjid.isFav ? 'bookmark' : 'bookmark-outline'" color="danger" (click)="onFavIconClick.emit(masjid)"></ion-icon>
+  <ion-icon class="favorite-icon" [name]="masjid.isFav ? 'bookmark' : 'bookmark-outline'" color="danger"
+    (click)="onFavIconClick.emit(masjid)"></ion-icon>
   <div class="masjid-name-wrapper" (click)="onMasjidNameClick.emit(true)">
     <ion-label class="masjid-name-en arabic">{{getMasjidName(masjid.masjid,'en')}}</ion-label>
     <ion-label class="masjid-name-ur arabic">{{getMasjidName(masjid.masjid,'ur')}}</ion-label>
   </div>
-<div *ngIf="timeEntries.length"  class="counter-labels-inputs-wrapper">
-  <div class="counter-label-input" *ngFor="let timeEntry of timeEntries" (click)="onTimeClick.emit(timeEntry)">
-    <div class="counter-label-arabic arabic">{{timeEntry.urName}}</div>
-    <ion-label>{{timeEntry.enLabel}}</ion-label>
-    <ion-text>{{timeEntry.time}}</ion-text>
+  <div *ngIf="timeEntries.length" class="counter-labels-inputs-wrapper">
+    <div class="counter-label-input" *ngFor="let timeEntry of timeEntries" (click)="onTimeClick.emit(timeEntry)">
+      <div class="counter-label-arabic arabic">{{timeEntry.urName}}</div>
+      <ion-label>{{timeEntry.enLabel}}</ion-label>
+      <ion-text *ngIf="timeEntry.secondaryTime">{{timeEntry.secondaryTime}}</ion-text>
+      <ion-text>{{timeEntry.time}}</ion-text>
+    </div>
   </div>
-</div>
 
 </div>

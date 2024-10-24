@@ -74,7 +74,8 @@ export class MasjidEntryComponent implements OnInit {
           enName: 'Juma',
           urLabel: 'جمعہ',
           enLabel: 'J',
-          time: this.masjid.juma
+          time: this.masjid.juma,
+          secondaryTime: this.masjid.jumaBayan
         }
       ]
     }

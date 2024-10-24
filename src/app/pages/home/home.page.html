@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title class="ion-no-padding">Prayer Times</ion-title>
-    <ion-text color="danger" style="font-size: small;"> {{(mService.selectedLocation$ | async)?.name || 'Loading...'}}
+    <ion-title>Prayer Times</ion-title>
+    <ion-text color="danger" style="font-size: small; padding: 20px;"> {{(mService.selectedLocation$ | async)?.name || 'Loading...'}}
     </ion-text>
 
     <ion-menu-button slot="start"></ion-menu-button>
@@ -30,7 +30,7 @@
     <div *ngIf="masjids.length" class="masjid-data-wrapper">
       <!-- Upcoming Jamaat Time -->
       <div *ngIf="this.currentNamaz" class="ion-text-center ion-margin-bottom">
-        <ion-button (click)="showUpcomingJamaatTimes()" color="danger" size="small">
+        <ion-button (click)="showUpcomingJamaatTimes()" shape="round" color="danger" size="small">
           <ion-icon slot="start" name="time-outline"></ion-icon>
           See Upcoming Jamaat Times
         </ion-button>
