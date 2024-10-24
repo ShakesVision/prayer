@@ -1,14 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { AlertController, ToastController } from '@ionic/angular';
-import { map } from 'rxjs';
+import { catchError, switchMap } from 'rxjs';
 import {
   ConsolidatedList,
   Masjid,
   Namaz,
   PrayerDataType,
+  timeEntry,
 } from 'src/app/models/common';
-import { MasjidServiceService } from 'src/app/services/masjid-service.service';
+import { LocationListType, MasjidServiceService } from 'src/app/services/masjid-service.service';
 
 @Component({
   selector: 'app-home',
@@ -18,6 +19,7 @@ import { MasjidServiceService } from 'src/app/services/masjid-service.service';
 export class HomePage implements OnInit {
   masjids: Masjid[] = [];
   filteredMasjids: Masjid[] = [];
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   prayerData: any;
   timings: {
@@ -35,53 +37,68 @@ export class HomePage implements OnInit {
   favMasjidNames: string[] = [];
   favMasjids: Masjid[] = [];
 
+  modalLang: 'en' | 'ur' = 'en';
+
+  selectedLocation!: LocationListType;
+
   constructor(
     private http: HttpClient,
     private alertController: AlertController,
     private toastController: ToastController,
-    private mService: MasjidServiceService
+    public mService: MasjidServiceService
   ) { }
 
   ngOnInit() {
-    this.fetchSheetData();
-    this.fetchPrayerData();
+    this.reset();
   }
 
   fetchSheetData() {
-    const url =
-      'https://script.google.com/macros/s/AKfycbzgdTLYd-4d47kxmsNxfOTqYE4gizk5VjEQXvpcjB-tNLFx_uUPWwVRRp7KTMaBXrRjIw/exec';
-    const url2 =
-      'https://script.google.com/macros/s/AKfycbxx1bALccf61Jz-wanrN5GRAtKvuMNmD74CO5GCWI0Mq4v-I_qFqg_lSxlvQXMbF3Y/exec';
-    this.http.get<Masjid[]>(url2).subscribe(
-      (data) => {
-        console.log(data);
-        this.masjids = data;
-        this.getFavMasjidsAndRender();
-        this.updateFilteredMasjid();
-        localStorage.setItem('masjids', JSON.stringify(this.masjids));
-        // this.sort(this.currentNamaz);
-      },
-      (err) => {
-        console.log(err);
-        this.http.get<Masjid[]>(url).subscribe(
-          (data) => {
-            this.masjids = data;
+    this.mService.selectedLocation$
+      .pipe(
+        switchMap(location => {
+          this.selectedLocation = location;
+          console.log(location);
+          const url1 = location.url1;
+          const url2 = location.url2;
+
+          this.fetchPrayerData();
+
+          // Attempt to fetch from url1
+          return this.http.get<Masjid[]>(url1).pipe(
+            catchError(err => {
+              console.error('Error fetching from url1:', err);
+              // On error, try fetching from url2
+              return this.http.get<Masjid[]>(url2).pipe(
+                catchError(err => {
+                  console.error('Error fetching from url2:', err);
+                  // If both requests fail, return an empty array or handle as needed
+                  return []; // Or throwError(err) to propagate the error
+                })
+              );
+            })
+          );
+        })
+      )
+      .subscribe(
+        data => {
+          // Handle successful response (from url1 or url2)
+          this.masjids = data;
+          localStorage.setItem('masjids', JSON.stringify(this.masjids));
+          this.getFavMasjidsAndRender();
+          this.updateFilteredMasjid();
+        },
+        err => {
+          console.error('Final error handling:', err);
+          // Handle the case where both API calls failed
+          const dataFromLocalStorage = localStorage.getItem('masjids');
+          if (dataFromLocalStorage) {
+            this.masjids = JSON.parse(dataFromLocalStorage);
+            this.getFavMasjidsAndRender();
             this.updateFilteredMasjid();
-            localStorage.setItem('masjids', JSON.stringify(this.masjids));
-          },
-          (err) => {
-            console.log(err);
-            const dataFromLocalStroage = localStorage.getItem('masjids');
-            if (dataFromLocalStroage) {
-              this.masjids = JSON.parse(dataFromLocalStroage);
-              this.getFavMasjidsAndRender();
-              this.updateFilteredMasjid();
-            }
-            this.showToast('Error getting the masaajid data. ');
           }
-        );
-      }
-    );
+          this.showToast('Error getting the masaajid data.');
+        }
+      );
   }
   fetchPrayerData() {
     const dateInDdMmYyyy = new Date()
@@ -92,7 +109,7 @@ export class HomePage implements OnInit {
       .join('-');
 
     // Api end point. Defaults to 24-hour format. Use &iso8601=true for ISO format.
-    const url = `https://api.aladhan.com/v1/timingsByCity/${dateInDdMmYyyy}?city=Kamptee&country=India&method=1&school=1`;
+    const url = `https://api.aladhan.com/v1/timingsByCity/${dateInDdMmYyyy}?city=${this.selectedLocation.name}&country=India&method=1&school=1`;
     this.http.get<any>(url).subscribe((data) => {
       console.log(data);
       this.prayerData = data.data;
@@ -193,9 +210,9 @@ export class HomePage implements OnInit {
         fajr: this.dateFormatter(masjid.fajr),
         zuhr: this.dateFormatter(masjid.zuhr),
         asr: this.dateFormatter(masjid.asr),
-        maghrib: this.prayerData
+        maghrib: this.areFourNamazTimesInvalid(masjid) ? '-' : (this.prayerData
           ? this.get12HoursFrom24Hours(this.prayerData.timings.Sunset)
-          : this.dateFormatter(masjid.maghrib),
+          : this.dateFormatter(masjid.maghrib)),
         isha: this.dateFormatter(masjid.isha),
         juma: this.dateFormatter(masjid.juma),
         jumaBayan: this.dateFormatter(masjid.jumaBayan, false),
@@ -204,15 +221,105 @@ export class HomePage implements OnInit {
     });
     return data;
   }
-
+  areFourNamazTimesInvalid(masjid: Masjid): boolean {
+    const times = [masjid.fajr, masjid.zuhr, masjid.asr, masjid.isha];
+    const invalidTimes = times.filter(time => ['', 'Invalid Date'].includes(time));
+    return invalidTimes.length === 4;
+  }
   filter(ev: any) {
     const query = ev.target.value.toLowerCase();
+    if (query === '') {
+      this.updateFilteredMasjid();
+      return;
+    }
     this.filteredMasjids = this.mapDataForUI(this.masjids).filter(
       (d) => d.masjid.toLowerCase().indexOf(query) > -1
     );
   }
 
-  sort(p?: Namaz) {
+  showSortOptions() {
+    this.alertController.create({
+      header: 'Sort by',
+      inputs: [
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Masjid Name',
+          value: 'masjid',
+          checked: true
+        },
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Fajr Time',
+          value: 'fajr'
+        },
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Zuhr Time',
+          value: 'zuhr'
+        },
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Asr Time',
+          value: 'asr'
+        },
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Maghrib Time',
+          value: 'maghrib'
+        },
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Isha Time',
+          value: 'isha'
+        },
+        {
+          name: 'sortOption',
+          type: 'radio',
+          label: 'Juma Time',
+          value: 'juma'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Sort',
+          handler: (data) => {
+            console.log(data);
+            this.sort(data);
+          }
+        }
+      ]
+    }).then(alert => {
+      alert.present();
+    });
+  }
+  sort(field: string) {
+    this.filteredMasjids = this.mapDataForUI(this.masjids).sort((a: any, b: any) => {
+      if (a[field] < b[field]) {
+        return -1;
+      } else if (a[field] > b[field]) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+  }
+
+  toggleSortDirection() {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.filteredMasjids.reverse();
+  }
+
+  sortByPrayer(p?: Namaz) {
     console.log(p);
     if (p === 'F')
       this.filteredMasjids = this.mapDataForUI(this.masjids).sort((a, b) =>
@@ -264,7 +371,7 @@ export class HomePage implements OnInit {
     });
   }
 
-  getPrayerNameFromLetter(input: Namaz) {
+  getPrayerNameFromLetter(input: string) {
     switch (input) {
       case 'F':
         return {
@@ -301,6 +408,11 @@ export class HomePage implements OnInit {
           en: 'Isha',
           ur: 'عشاء',
         };
+      case 'J':
+        return {
+          en: 'Juma',
+          ur: 'جمعہ',
+        };
       default:
         return {
           en: '',
@@ -317,7 +429,8 @@ export class HomePage implements OnInit {
 
     data.forEach((item: any) => {
       const time = item[propertyName];
-      const masjidName = this.mService.getMasjidName(item.masjid, 'en');
+      // const masjidName = this.mService.getMasjidName(item.masjid, 'en');
+      const masjidName = item.masjid;
       if (groupedData[time]) {
         groupedData[time].push(masjidName);
       } else {
@@ -338,14 +451,21 @@ export class HomePage implements OnInit {
     return consolidatedList;
   }
 
-  showUpcomingJamaatTimes(salahName?: any) {
-    salahName = this.getPrayerNameFromLetter(salahName ?? this.currentNamaz).en;
+  showUpcomingJamaatTimes(prayerIdChar = 'X') {
+    let salahName = this.getPrayerNameFromLetter(prayerIdChar === 'X' ? this.currentNamaz : prayerIdChar).en;
+
+    // if UI big button is clicked to show upcoming jamaat times, and today is friday, set salahName to 'Juma'
+    if (prayerIdChar === 'X' && new Date().getDay() === 5) salahName = 'Juma';
+
     this.consolidatedList = this.getConsolidatedList(
-      this.filteredMasjids.filter((m) =>
-        Object.values(m).every((value) => value !== '-')
-      ),
+      this.filteredMasjids.filter((m) => {
+        const salahId = salahName.toLowerCase();
+        // filter out masjids that have '-' in their salah time
+        return m[salahId as keyof Masjid] !== '-'
+      }),
       salahName.toLowerCase()
     ).sort((a, b) => (a.time > b.time ? 1 : -1));
+
     console.log(salahName, this.consolidatedList);
     this.setOpen(true, salahName);
   }
@@ -411,17 +531,17 @@ export class HomePage implements OnInit {
       .join('\n');
 
     const textToCopy = `🌅 Fajr
-      ${fajrString}
+${fajrString}
 
 🌄 Tulu e Aftab         ${this.get12HoursFrom24Hours(
       this.prayerData.timings.Sunrise
     )}
       
 ☀️ Zohar 
-      ${zuhrString}
+${zuhrString}
 
 🌤️ Asr
-      ${asrString}
+${asrString}
 
 🌅 Gurube Aftab     ${this.get12HoursFrom24Hours(
       this.prayerData.timings.Sunset
@@ -432,10 +552,10 @@ export class HomePage implements OnInit {
     )}
 
 🌌 Isha
-      ${ishaString}
+${ishaString}
 
 🕌 Juma
-      ${jumaString}
+${jumaString}
           `;
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -479,6 +599,12 @@ export class HomePage implements OnInit {
     // Implement your logic here
   }
 
+  /**
+   * Adds a value to the array if it doesn't exist, or removes it if it does.
+   * @param arr The array to add/remove from.
+   * @param value The value to add/remove.
+   * @returns The modified array.
+   */
   addOrRemove(arr: string[], value: string): string[] {
     if (arr.includes(value)) {
       return arr.filter(item => item !== value);
@@ -487,6 +613,14 @@ export class HomePage implements OnInit {
     }
   }
 
+  /*************  ✨ Codeium Command ⭐  *************/
+  /**
+   * Favorite the given masjid. If the masjid is already favorited,
+   * remove it from the favorite list. Otherwise, add it to the list.
+   * After modifying the favorite list, re-render the favorite list.
+   * @param masjid The masjid to favorite or unfavorite.
+   */
+  /******  3cf82af1-12fa-4a13-92f6-5847155279a5  *******/
   fav(masjid: Masjid) {
     // Favorite the item. If already favorited, remove from the fav list.
     this.favMasjidNames = this.addOrRemove(this.favMasjidNames, masjid.masjid);
@@ -496,5 +630,75 @@ export class HomePage implements OnInit {
 
   getMasjidDataFromName(name: string) {
     return this.masjids.find(m => m.masjid === name);
+  }
+
+  /**
+   * Called when the user pulls to refresh the page.
+   * Resets all configurations and fetches the data again.
+   * @param event The event object passed from the ion-refresher component.
+   */
+  async doRefresh(event: any) {
+    console.log('Begin async operation');
+
+    // Reset all configurations and fetch data again
+    this.reset();
+
+    // Complete the refresher event
+    setTimeout(() => {
+      console.log('Async operation has ended');
+      event.target.complete();
+    }, 2000);
+  }
+
+  /**
+   * Opens a popup with a list of masjids that have not missed the time according to the consolidated list.
+   * The user can click on a masjid to go to the page with the map and directions.
+   * @param consolidatedList The consolidated list of prayer times.
+   */
+  async openWhereToGoPopup() {
+    let salahName = this.getPrayerNameFromLetter(this.currentNamaz).en;
+    const availableMasjids =
+      this.getConsolidatedList(
+        this.filteredMasjids.filter((m) => {
+          const salahId = salahName.toLowerCase();
+          // filter out masjids that have '-' in their salah time
+          return m[salahId as keyof Masjid] !== '-'
+        }),
+        salahName.toLowerCase()
+      ).filter(a => !a.missed).sort((a, b) => (a.time > b.time ? 1 : -1));
+console.log(availableMasjids);
+    // if there are no available masjids, do not open the popup
+    if (availableMasjids.length === 0) return false;
+
+    // Open popup
+    const alert = await this.alertController.create({
+      header: 'Where to go?',
+      message: 'The following masjids have not missed the time:' + availableMasjids.join('<br>'),
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Confirm Cancel');
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+    return true;
+  }
+
+  /**
+   * Resets all configurations and fetches the data again.
+   * Called from ngOnInit and doRefresh.
+   */
+  reset() {
+    this.masjids = [];
+    this.filteredMasjids = [];
+    this.prayerData = {};
+    this.timings = [];
+    this.favMasjids = [];
+    this.fetchSheetData();
   }
 }

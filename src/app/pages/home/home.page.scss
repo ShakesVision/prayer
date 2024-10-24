@@ -8,6 +8,7 @@
     border-radius: 4px;
   }
 }
+
 .favmasjid {
   background-color: var(--ion-color-light);
 }
@@ -20,4 +21,14 @@
 
 .arabic {
   font-size: x-small;
+}
+
+ion-item {
+  --padding-end: 0px;
+  --inner-padding-end: 0px;
+}
+
+ion-refresher ion-refresher-content {
+  background: #FFF;
+  --color: #000 !important;
 }

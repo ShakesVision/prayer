@@ -1,6 +1,8 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Prayer Times - Kamptee</ion-title>
+    <ion-title class="ion-no-padding">Prayer Times</ion-title>
+    <ion-text color="danger" style="font-size: small;"> {{(mService.selectedLocation$ | async)?.name || 'Loading...'}}
+    </ion-text>
 
     <ion-menu-button slot="start"></ion-menu-button>
     <ion-button *ngIf="filteredMasjids.length" slot="end" (click)="copy()" fill="clear" color="dark">
@@ -10,8 +12,12 @@
 </ion-header>
 
 <ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
   <ion-progress-bar *ngIf="!prayerData || !masjids.length" type="indeterminate" color="danger"></ion-progress-bar>
-  <div class="content-wrapper" class="ion-padding">
+  <div class="content-wrapper">
     <!-- Prayer Data -->
     <div *ngIf="prayerData" class="top-timings-banner counter-labels-inputs-wrapper ion-margin-bottom">
       <div *ngFor="let prayer of timings" class="counter-label-input" [ngClass]="{'active-prayer':prayer.active}"
@@ -28,22 +34,60 @@
           <ion-icon slot="start" name="time-outline"></ion-icon>
           See Upcoming Jamaat Times
         </ion-button>
+        <!-- Where to go? -->
+        <!-- This will load a popup with all masjid names where we can reach in time. -->
+
+        <!-- <ion-button *ngIf="openWhereToGoPopup()" (click)="openWhereToGoPopup()" color="success" size="small">
+          <ion-icon slot="start" name="walk"></ion-icon>
+          Where to go?
+        </ion-button> -->
+
       </div>
 
-      <p class="ion-text-center" style="font-size: x-small;" *ngIf="favMasjids.length">Your favorites: <span class="fancy-number">{{favMasjids.length}}</span></p>
+      <p class="ion-text-center" style="font-size: x-small;" *ngIf="favMasjids.length">Your favorites: <span
+          class="fancy-number">{{favMasjids.length}}</span></p>
 
       <!-- List of Favorite Masjids -->
-      <div class="favmasjid" *ngFor="let masjid of favMasjids">
-        <masjid-entry [masjid]="masjid" (onMasjidNameClick)="sort()" (onFavIconClick)="fav(masjid)"></masjid-entry>
+      <div class="favmasjid ion-margin" *ngFor="let masjid of favMasjids">
+        <masjid-entry [masjid]="masjid" (onMasjidNameClick)="sortByPrayer()"
+          (onFavIconClick)="fav(masjid)"></masjid-entry>
       </div>
-      <!-- Searchbar -->
-      <ion-searchbar placeholder="Search...تلاش" class="ion-no-padding arabic" [debounce]="300"
-        (ionInput)="filter($event)"></ion-searchbar>
+
+      <ion-item lines="none" class="ion-no-padding">
+        <!-- Searchbar -->
+        <ion-searchbar placeholder="Search...تلاش" class="arabic ion-no-margin ion-no-padding ion-padding-start"
+          [debounce]="300" (ionInput)="filter($event)"></ion-searchbar>
+        <ion-buttons size="small">
+          <!-- Sort button -->
+          <ion-button size="small" color="dark" (click)="showSortOptions()">
+            <ion-icon name="funnel-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <!-- Sort direction button -->
+          <ion-button size="small" color="dark" (click)="toggleSortDirection()">
+            <ion-icon name="swap-vertical-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-item>
+      <!-- Count -->
+      <div class="ion-text-center">
+        <span style="font-size:x-small">Showing {{filteredMasjids.length}} of {{masjids.length}} Masjids </span>
+      </div>
+
+      <!-- Divider image -->
+      <!-- <div class="ion-padding">
+        <img style="width: 100%; " src="assets/divider.svg" alt="divider">
+      </div> -->
+
       <!-- List of Masjids -->
-      <div class="masjid" *ngFor="let masjid of filteredMasjids" long-press (longPress)="onLongPress()">
-        <masjid-entry [masjid]="masjid" (onMasjidNameClick)="sort()" (onFavIconClick)="fav(masjid)"></masjid-entry>
+      <div class="list-of-masjid-data-wrapper ion-padding">
+
+        <div class="masjid" *ngFor="let masjid of filteredMasjids" long-press (longPress)="onLongPress()">
+          <masjid-entry [masjid]="masjid" (onMasjidNameClick)="sortByPrayer()" (onFavIconClick)="fav(masjid)"
+            (onTimeClick)="showUpcomingJamaatTimes($event.enLabel)"></masjid-entry>
+        </div>
       </div>
     </div>
+
     <!-- Modal content -->
     <ion-modal [isOpen]="isModalOpen">
       <ng-template>
@@ -51,6 +95,9 @@
           <ion-toolbar>
             <ion-title>{{salahName}}</ion-title>
             <ion-buttons slot="end">
+              <ion-button (click)="modalLang = modalLang === 'ur' ? 'en' : 'ur'">
+                <ion-icon name="language-outline" slot="icon-only"></ion-icon>
+              </ion-button>
               <ion-button
                 (click)="showAlert('This is a consolidated list of Salah times in the masaajid. Time in RED indicates you have missed the takbeer-e-tahreema, while GREEN indicates you\'ll catch it - hurry!','Help')">
                 <ion-icon name="help-circle-outline" slot="icon-only"></ion-icon>
@@ -70,7 +117,10 @@
                 <ion-icon *ngIf="item.missed" name="close-circle-outline"></ion-icon>
               </h4>
             </ion-text>
-            <ion-chip *ngFor="let m of item.masjids"> {{m}} </ion-chip>
+            <ion-chip *ngFor="let m of item.masjids" [ngClass]="{'arabic': modalLang === 'ur'}"
+              style="font-size: small;">
+              {{ (modalLang === 'ur') ? mService.getMasjidName(m, 'ur') : mService.getMasjidName(m, 'en') }}
+            </ion-chip>
           </div>
         </ion-content>
       </ng-template>

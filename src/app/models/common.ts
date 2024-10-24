@@ -19,7 +19,7 @@ export interface AppPages {
   url: 'help' | 'about' | 'playstore';
   icon: string;
 }
-export type Namaz = 'F' | 'R' | 'X' | 'Z' | 'A' | 'M' | 'I' | '';
+export type Namaz = 'F' | 'R' | 'X' | 'Z' | 'A' | 'M' | 'I' | 'J' | '';
 export type NamazFull =
   | 'Fajr'
   | 'Sunrise'
@@ -36,3 +36,11 @@ export type PrayerDataType =
   | 'Asr'
   | 'Maghrib'
   | 'Isha';
+export interface timeEntry {
+  id: string;
+  urName: string;
+  enName: string;
+  urLabel: string;
+  enLabel: string;
+  time: string;
+}

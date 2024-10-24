@@ -3,10 +3,36 @@
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
         <ion-list id="inbox-list">
-          <ion-list-header>Prayer Times - Kamptee</ion-list-header>
+          <ion-list-header>Prayer Times</ion-list-header>
           <ion-note>by Shakeeb Ahmad</ion-note>
+          <!-- Location item -->
+          <ion-item lines="none">
+            <ng-container *ngIf="selectedLocation !== undefined">
+              <ion-select slot="start" [value]="selectedLocation" [compareWith]="compareFn"
+                (ionChange)="handleChange($event)" [interfaceOptions]="customPopoverOptions" interface="popover"
+                placeholder="Location" value="kamptee">
+                <ion-select-option *ngFor="let location of locations"
+                  [value]="location">{{location.name}}</ion-select-option>
+              </ion-select>
+            </ng-container>
+
+            <ion-buttons slot="end">
+              <ion-button (click)="addLocation(selectedLocation)">
+                <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+              </ion-button>
+              <ion-button (click)="deleteLocation(selectedLocation)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-item>
+
+          <ion-button fill="clear" (click)="addLocation()">
+            <ion-icon slot="start" name="add"></ion-icon>
+            <ion-label>Add new location</ion-label>
+          </ion-button>
 
           <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
+            <!-- Static page items -->
             <ion-item routerDirection="root" button (click)="gotopage(p.url)" lines="none" detail="false"
               routerLinkActive="selected">
               <ion-icon aria-hidden="true" slot="start" [name]="p.icon"></ion-icon>
@@ -15,11 +41,11 @@
           </ion-menu-toggle>
         </ion-list>
 
-        <ion-item lines="none" class="darkWrapper">
-          <ion-toggle (ionChange)="changeTheme($event)" slot="end"></ion-toggle>
-          Dark mode
-        </ion-item>
-
+        <ion-list><ion-item lines="none" class="darkWrapper">
+            <ion-toggle (ionChange)="changeTheme($event)" slot="end"></ion-toggle>
+            Dark mode
+          </ion-item>
+        </ion-list>
         <div *ngIf="lastUpdated !== ''" class="last-updated">
           <ion-label>App last updated: </ion-label>
           <ion-label [innerHTML]="lastUpdated" style="font-style: italic;"></ion-label>

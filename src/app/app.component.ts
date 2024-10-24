@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
-import { NavController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { AppPages } from './models/common';
+import { LocationListType, MasjidServiceService } from './services/masjid-service.service';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -10,6 +11,8 @@ import { AppPages } from './models/common';
 })
 export class AppComponent {
   lastUpdated: string = '';
+  locations: LocationListType[] = [];
+  selectedLocation!: LocationListType;
 
   public appPages: AppPages[] = [
     { title: 'Help', url: 'help', icon: 'help-circle' },
@@ -17,11 +20,44 @@ export class AppComponent {
     { title: 'Other apps', url: 'playstore', icon: 'logo-google-playstore' },
   ];
 
-  constructor(private router: Router, private http: HttpClient) {}
+  /**
+   * Popover options for ion-select.
+   */
+  customPopoverOptions = {
+    header: 'Add or switch locations',
+    subHeader: 'You can add you custom sheet url for the data - and the app will configure the data for you.',
+    message: 'Refer the existing sheet URL for example data. Copy it and modify to create your own.',
+  };
+
+  constructor(private router: Router, private http: HttpClient, private mService: MasjidServiceService, private alertController: AlertController) { }
 
   ngOnInit() {
     this.fetchLastCommitTime();
+    this.mService.loadLocations();
+    this.mService.selectedLocation$.subscribe(location => {
+      this.selectedLocation = location;
+      this.locations = this.mService.locations;
+    });
+    console.log(this.locations, this.mService.locations);
   }
+
+  /**
+   * Compare function for the ion-select so that the first value in the dropdown can be selected.
+   * @param e1 location 1
+   * @param e2 location 2
+   * @returns boolean
+   */
+  compareFn(e1: LocationListType, e2: LocationListType): boolean {
+    return e1 && e2 ? e1.id == e2.id : e1 == e2;
+  }
+
+  /**
+   * Navigates to a dynamic content page. The page title and content are passed
+   * as parameters. The content is expected to be a string of HTML content.
+   * The page title is used as the title of the page and the part of the URL.
+   * @param pageTitle the title of the page
+   * @param htmlContent the HTML content of the page
+   */
   goToDynamicContentPage(pageTitle: string, htmlContent: string) {
     let navigationExtras: NavigationExtras = {
       state: { pageTitle, htmlContent },
@@ -82,6 +118,11 @@ export class AppComponent {
     }
   }
 
+  /**
+   * Fetches the last commit time from GitHub API, and updates the `lastUpdated`
+   * property with the commit date and message. If the API call fails,
+   * `lastUpdated` is set to an empty string.
+   */
   fetchLastCommitTime() {
     const repoOwner = 'shakesvision';
     const repoName = 'prayer';
@@ -92,8 +133,14 @@ export class AppComponent {
         if (response.length > 0) {
           const lastCommitTime = response[0].commit.author.date;
           this.lastUpdated = `${new Date(lastCommitTime).toLocaleString()}
+            <br><br>
+            ${response[0].commit.message}
             <br>
-            (${response[0].commit.message})`;
+            (${new Date(response[0].commit.author.date).toLocaleString('en-US', { month: 'long', day: 'numeric' })})
+            <br>
+            ${response[1].commit.message}
+            <br>
+            (${new Date(response[1].commit.author.date).toLocaleString('en-US', { month: 'long', day: 'numeric' })})`;
         } else {
           this.lastUpdated = '';
         }
@@ -105,7 +152,131 @@ export class AppComponent {
     );
   }
 
+  /**
+   * Toggles the 'dark' class on the <body> element to switch between
+   * light and dark themes.
+   * @param event The event object passed from the ion-toggle component.
+   */
   changeTheme(event: any) {
     document.body.classList.toggle('dark');
   }
+
+  handleChange(e: any) {
+    console.log('ionChange fired with value: ', e.detail.value);
+    this.selectedLocation = e.detail.value;
+    this.mService.selectedLocation$.next(this.selectedLocation);
+  }
+
+  /**
+   * Prompts the user to input a new location (or edit an existing one).
+   * If the user clicks 'Save', the new location is added to the list of
+   * locations. If the user clicks 'Cancel', the dialog is simply dismissed.
+   * @param location The location to edit, or undefined if adding a new location.
+   */
+  async addLocation(location?: LocationListType) {
+    const alert = await this.alertController.create({
+      header: location ? 'Edit Location' : 'Add Location',
+      inputs: [
+        {
+          name: 'id',
+          type: 'text',
+          placeholder: 'ID',
+          value: location ? location.id : '',
+        },
+        {
+          name: 'name',
+          type: 'text',
+          placeholder: 'Name',
+          value: location ? location.name : '',
+        },
+        {
+          name: 'latitude',
+          type: 'text',
+          placeholder: 'Latitude',
+          value: location ? location.latitude : '',
+        },
+        {
+          name: 'longitude',
+          type: 'text',
+          placeholder: 'Longitude',
+          value: location ? location.longitude : '',
+        },
+        {
+          name: 'url1',
+          type: 'text',
+          placeholder: 'Data URL (URL 1)',
+          value: location ? location.url1 : '',
+        },
+        {
+          name: 'url2',
+          type: 'text',
+          placeholder: 'Backup Data URL (URL 2), incase url1 doesn\'t work',
+          value: location ? location.url2 : '',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Save',
+          handler: (data) => {
+            if (location) {
+              // Edit mode: Update the existing location
+              this.mService.updateLocation(data);
+            } else {
+              // Add mode: Create a new location
+              this.createLocation(data);
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Adds a new location to the list of locations and saves it to local storage.
+   * @param data The location data to be added.
+   */
+  private createLocation(data: LocationListType) {
+    this.locations.push(data);
+    this.mService.saveLocations();
+  }
+
+  /**
+   * Deletes a location from the list of locations and saves it to local storage.
+   * @param location The location to be deleted.
+   */
+  async deleteLocation(location: LocationListType) {
+    // Prevent deletion of the default location
+    if (location.id === 'kamptee') return;
+    const index = this.locations.findIndex(l => l.id === location.id);
+    const alert = await this.alertController.create({
+      header: 'Confirm',
+      message: 'Are you sure you want to delete this location?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Delete',
+          handler: () => {
+            if (index !== -1) {
+              this.locations.splice(index, 1);
+              const selectedIndex = Math.max(index - 1, 0);
+              this.mService.selectedLocation$.next(this.locations[selectedIndex]);
+              this.mService.saveLocations();
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
 }
