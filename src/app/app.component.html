@@ -5,6 +5,7 @@
         <ion-list id="inbox-list">
           <ion-list-header>Prayer Times</ion-list-header>
           <ion-note>by Shakeeb Ahmad</ion-note>
+
           <!-- Location item -->
           <ion-item lines="none">
             <ng-container *ngIf="selectedLocation !== undefined">
@@ -15,7 +16,7 @@
                   [value]="location">{{location.name}}</ion-select-option>
               </ion-select>
             </ng-container>
-
+            <!-- Edit / delete location -->
             <ion-buttons slot="end">
               <ion-button (click)="addLocation(selectedLocation)">
                 <ion-icon slot="icon-only" name="create-outline"></ion-icon>
@@ -26,22 +27,25 @@
             </ion-buttons>
           </ion-item>
 
-          <ion-button shape="round" size="small" color="dark" (click)="addLocation()">
+          <!-- Add location -->
+
+          <ion-button class="ion-margin-bottom" shape="round" size="small" color="dark" (click)="addLocation()">
             <ion-icon slot="start" name="add"></ion-icon>
             <ion-label>Add new location</ion-label>
           </ion-button>
 
           <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
             <!-- Static page items -->
-            <ion-item routerDirection="root" button (click)="gotopage(p.url)" lines="none" detail="false"
-              routerLinkActive="selected">
+            <ion-item routerDirection="root" button (click)="gotopage(p.url)" lines="none"
+              detail="false" routerLinkActive="selected">
               <ion-icon aria-hidden="true" slot="start" [name]="p.icon"></ion-icon>
               <ion-label>{{ p.title }}</ion-label>
             </ion-item>
           </ion-menu-toggle>
         </ion-list>
 
-        <ion-list><ion-item lines="none" class="darkWrapper">
+        <ion-list>
+          <ion-item lines="none" class="darkWrapper">
             <ion-toggle (ionChange)="changeTheme($event)" slot="end"></ion-toggle>
             Dark mode
           </ion-item>

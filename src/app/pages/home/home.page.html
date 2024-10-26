@@ -1,7 +1,8 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Prayer Times</ion-title>
-    <ion-text color="danger" style="font-size: small; padding: 20px;"> {{(mService.selectedLocation$ | async)?.name || 'Loading...'}}
+    <ion-text color="danger" style="font-size: small; padding: 20px;"> {{(mService.selectedLocation$ | async)?.name ||
+      'Loading...'}}
     </ion-text>
 
     <ion-menu-button slot="start"></ion-menu-button>
@@ -69,7 +70,7 @@
         </ion-buttons>
       </ion-item>
       <!-- Count -->
-      <div class="ion-text-center">
+      <div class="ion-text-center count-text">
         <span style="font-size:x-small">Showing {{filteredMasjids.length}} of {{masjids.length}} Masjids </span>
       </div>
 

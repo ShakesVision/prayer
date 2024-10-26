@@ -6,8 +6,7 @@ import {
   ConsolidatedList,
   Masjid,
   Namaz,
-  PrayerDataType,
-  timeEntry,
+  PrayerDataType
 } from 'src/app/models/common';
 import { LocationListType, MasjidServiceService } from 'src/app/services/masjid-service.service';
 
@@ -244,7 +243,7 @@ export class HomePage implements OnInit {
         {
           name: 'sortOption',
           type: 'radio',
-          label: 'Masjid Name',
+          label: 'Masjid Name (A-Z)',
           value: 'masjid',
           checked: true
         },
@@ -265,12 +264,6 @@ export class HomePage implements OnInit {
           type: 'radio',
           label: 'Asr Time',
           value: 'asr'
-        },
-        {
-          name: 'sortOption',
-          type: 'radio',
-          label: 'Maghrib Time',
-          value: 'maghrib'
         },
         {
           name: 'sortOption',
@@ -454,8 +447,8 @@ export class HomePage implements OnInit {
   showUpcomingJamaatTimes(prayerIdChar = 'X') {
     let salahName = this.getPrayerNameFromLetter(prayerIdChar === 'X' ? this.currentNamaz : prayerIdChar).en;
 
-    // if UI big button is clicked to show upcoming jamaat times, and today is friday, set salahName to 'Juma'
-    if (prayerIdChar === 'X' && new Date().getDay() === 5) salahName = 'Juma';
+    // if UI big button is clicked to show upcoming jamaat times, and it's Zuhr time, and today is friday, set salahName to 'Juma'
+    if (prayerIdChar === 'X' && salahName === 'Zuhr' && new Date().getDay() === 5) salahName = 'Juma';
 
     this.consolidatedList = this.getConsolidatedList(
       this.filteredMasjids.filter((m) => {
@@ -666,7 +659,7 @@ ${jumaString}
         }),
         salahName.toLowerCase()
       ).filter(a => !a.missed).sort((a, b) => (a.time > b.time ? 1 : -1));
-console.log(availableMasjids);
+    console.log(availableMasjids);
     // if there are no available masjids, do not open the popup
     if (availableMasjids.length === 0) return false;
 

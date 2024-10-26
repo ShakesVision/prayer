@@ -32,3 +32,15 @@ ion-refresher ion-refresher-content {
   background: #FFF;
   --color: #000 !important;
 }
+
+.count-text {
+  margin: 5px;
+  span {
+    font-size: x-small;
+    padding: 5px;
+    border: 1px dashed darkgrey;
+    margin: 5px;
+    border-radius: 5px;
+    // background: var(--ion-color-warning-tint);
+  }
+}

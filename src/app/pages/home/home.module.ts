@@ -14,7 +14,7 @@ import { MasjidEntryComponent } from 'src/app/components/masjid-entry/masjid-ent
     CommonModule,
     FormsModule,
     IonicModule,
-    HomePageRoutingModule
+    HomePageRoutingModule,
   ],
   declarations: [HomePage, MasjidEntryComponent]
 })

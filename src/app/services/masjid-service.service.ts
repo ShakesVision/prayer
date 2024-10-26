@@ -27,7 +27,7 @@ export class MasjidServiceService {
     url2:
       'https://script.google.com/macros/s/AKfycbzgdTLYd-4d47kxmsNxfOTqYE4gizk5VjEQXvpcjB-tNLFx_uUPWwVRRp7KTMaBXrRjIw/exec'
   }];
-  
+
   selectedLocation$ = new BehaviorSubject<LocationListType>(this.locations[0]);
 
   constructor() { }

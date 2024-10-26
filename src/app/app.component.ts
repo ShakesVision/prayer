@@ -10,11 +10,15 @@ import { LocationListType, MasjidServiceService } from './services/masjid-servic
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
+  DEFAULT_LOCATION = 'kamptee';
   lastUpdated: string = '';
+  githubCommits!:any[];
   locations: LocationListType[] = [];
   selectedLocation!: LocationListType;
 
   public appPages: AppPages[] = [
+    { title: 'Todo', url: 'todo', icon: 'hourglass' },
+    { title: 'Changelog', url: 'changelog', icon: 'list' },
     { title: 'Help', url: 'help', icon: 'help-circle' },
     { title: 'About', url: 'about', icon: 'information-circle' },
     { title: 'Other apps', url: 'playstore', icon: 'logo-google-playstore' },
@@ -25,8 +29,7 @@ export class AppComponent {
    */
   customPopoverOptions = {
     header: 'Add or switch locations',
-    subHeader: 'You can add you custom sheet url for the data - and the app will configure the data for you.',
-    message: 'Refer the existing sheet URL for example data. Copy it and modify to create your own.',
+    message: 'You can add custom location with data url - URL should return JSON. Refer the existing sheet URL for example data. Copy & modify to create your own.',
   };
 
   constructor(private router: Router, private http: HttpClient, private mService: MasjidServiceService, private alertController: AlertController) { }
@@ -87,6 +90,34 @@ export class AppComponent {
       <ion-icon slot='start' name='globe'></ion-icon> Blog (Urdu) : <a href="https://ur.shakeeb.in"> ur.shakeeb.in </a> <br>
       `;
     switch (url) {
+      case 'changelog':
+        pageTitle = 'Changelog';
+        this.githubCommits.forEach((commit:any,i) => {
+          htmlContent += `
+            <b>${i+1}. 
+              ${new Date(commit.commit.author.date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
+            </b>
+          <br>
+          <i style="margin-left:1rem">${commit.commit.message}</i>
+          <br><br>
+          `;
+        });
+        this.goToDynamicContentPage(pageTitle, htmlContent);
+        break;
+      case 'todo':
+        pageTitle = 'Todo';
+        htmlContent = `
+        <ul>
+          <li>Copy button should exclude '-' value salah times.</li>
+          <li>Accept Google Sheet URL from user along with the exisiting "JSON End point". Convert the sheet to the json endpoint yourself. Otherwise, other hosts will work using endpoint.</li>
+          <li>A way to create snapshot of all timings / ui screen as chart. Preferably export as pdf as well as image. Would be useful in sending daily updates to the "City" Whatsapp groups.</li>
+          <li>Update app icon and labels to generalize (YAST) instead of specifying "Kamptee", since we support custom locations now.</li>
+          <li>Don't exit the app on back button directly, confirm first.</li>
+          <li>Use prayertiming library (batoulapps/adhan-js) instead of API.</li>
+        </ul>
+        `;
+        this.goToDynamicContentPage(pageTitle, htmlContent);
+        break;
       case 'help':
         pageTitle = 'Help';
         htmlContent = `Although the UI is intuitive, here's a comprehensive list of features for ease of use.
@@ -132,15 +163,8 @@ export class AppComponent {
       (response: any) => {
         if (response.length > 0) {
           const lastCommitTime = response[0].commit.author.date;
-          this.lastUpdated = `${new Date(lastCommitTime).toLocaleString()}
-            <br><br>
-            ${response[0].commit.message}
-            <br>
-            (${new Date(response[0].commit.author.date).toLocaleString('en-US', { month: 'long', day: 'numeric' })})
-            <br>
-            ${response[1].commit.message}
-            <br>
-            (${new Date(response[1].commit.author.date).toLocaleString('en-US', { month: 'long', day: 'numeric' })})`;
+          this.lastUpdated = `${new Date(lastCommitTime).toLocaleString()}`;
+          this.githubCommits = response;
         } else {
           this.lastUpdated = '';
         }
@@ -174,6 +198,7 @@ export class AppComponent {
    * @param location The location to edit, or undefined if adding a new location.
    */
   async addLocation(location?: LocationListType) {
+    const isDefaultLocation = location?.id === this.DEFAULT_LOCATION;
     const alert = await this.alertController.create({
       header: location ? 'Edit Location' : 'Add Location',
       inputs: [
@@ -182,36 +207,44 @@ export class AppComponent {
           type: 'text',
           placeholder: 'ID',
           value: location ? location.id : '',
+          disabled: isDefaultLocation
         },
         {
           name: 'name',
           type: 'text',
           placeholder: 'Name',
           value: location ? location.name : '',
+          disabled: isDefaultLocation
         },
         {
           name: 'latitude',
           type: 'text',
           placeholder: 'Latitude',
           value: location ? location.latitude : '',
+          disabled: isDefaultLocation
         },
         {
           name: 'longitude',
           type: 'text',
           placeholder: 'Longitude',
           value: location ? location.longitude : '',
+          disabled: isDefaultLocation
+
         },
         {
           name: 'url1',
           type: 'text',
           placeholder: 'Data URL (URL 1)',
           value: location ? location.url1 : '',
+          disabled: isDefaultLocation
+
         },
         {
           name: 'url2',
           type: 'text',
           placeholder: 'Backup Data URL (URL 2), incase url1 doesn\'t work',
           value: location ? location.url2 : '',
+          disabled: isDefaultLocation
         },
       ],
       buttons: [
@@ -252,7 +285,7 @@ export class AppComponent {
    */
   async deleteLocation(location: LocationListType) {
     // Prevent deletion of the default location
-    if (location.id === 'kamptee') return;
+    if (location.id === this.DEFAULT_LOCATION) return;
     const index = this.locations.findIndex(l => l.id === location.id);
     const alert = await this.alertController.create({
       header: 'Confirm',

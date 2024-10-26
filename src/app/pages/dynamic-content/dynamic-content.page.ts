@@ -23,7 +23,7 @@ export class DynamicContentPage implements OnInit {
         this.pageTitle =
           this.router.getCurrentNavigation()?.extras?.state?.['pageTitle'];
         this.htmlContent =
-          this.router.getCurrentNavigation()?.extras?.state?.['htmlContent'];
+        this.sanitizer.bypassSecurityTrustHtml(this.router.getCurrentNavigation()?.extras?.state?.['htmlContent']);
       }
     });
   }

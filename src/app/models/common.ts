@@ -16,7 +16,7 @@ export interface ConsolidatedList {
 }
 export interface AppPages {
   title: string;
-  url: 'help' | 'about' | 'playstore';
+  url: 'todo' | 'help' | 'changelog' | 'about' | 'playstore';
   icon: string;
 }
 export type Namaz = 'F' | 'R' | 'X' | 'Z' | 'A' | 'M' | 'I' | 'J' | '';
