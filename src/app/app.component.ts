@@ -3,7 +3,10 @@ import { Component } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { AppPages } from './models/common';
-import { LocationListType, MasjidServiceService } from './services/masjid-service.service';
+import {
+  LocationListType,
+  MasjidServiceService,
+} from './services/masjid-service.service';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -12,7 +15,7 @@ import { LocationListType, MasjidServiceService } from './services/masjid-servic
 export class AppComponent {
   DEFAULT_LOCATION = 'kamptee';
   lastUpdated: string = '';
-  githubCommits!:any[];
+  githubCommits!: any[];
   locations: LocationListType[] = [];
   selectedLocation!: LocationListType;
 
@@ -29,15 +32,21 @@ export class AppComponent {
    */
   customPopoverOptions = {
     header: 'Add or switch locations',
-    message: 'You can add custom location with data url - URL should return JSON. Refer the existing sheet URL for example data. Copy & modify to create your own.',
+    message:
+      'You can add custom location with data url - URL should return JSON. Refer the existing sheet URL for example data. Copy & modify to create your own.',
   };
 
-  constructor(private router: Router, private http: HttpClient, private mService: MasjidServiceService, private alertController: AlertController) { }
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private mService: MasjidServiceService,
+    private alertController: AlertController
+  ) {}
 
   ngOnInit() {
     this.fetchLastCommitTime();
     this.mService.loadLocations();
-    this.mService.selectedLocation$.subscribe(location => {
+    this.mService.selectedLocation$.subscribe((location) => {
       this.selectedLocation = location;
       this.locations = this.mService.locations;
     });
@@ -70,8 +79,16 @@ export class AppComponent {
   gotopage(url: AppPages['url']) {
     let pageTitle = '';
     let htmlContent = '';
-    let defaultPageTitle = 'About me and this app';
-    let defaultHtmlContent = `<p>I've slapped this app together in 3-4 days so there's room for improvement. </p>
+    let defaultPageTitle = 'About';
+    let defaultHtmlContent = `<h2>YAST - Yet Another Salah Time</h2>
+    <i>Never miss a Jamaat, near or far <br> لا تفوت جماعة، قريبًا أو بعيدًا</i>
+
+    <p>
+      <b>Version 1</b>
+      <i>February 25, 2024</i>
+    </p>
+    <hr style='background: lightgrey;'>
+    <p>I've slapped this app together in 3-4 days so there's room for improvement. </p>
     <ul>  
     <li>If you're a user, suggest what would make it better.</li>
     <li>If you're a developer, the app is open source. Pull requests are welcome.</li>
@@ -80,6 +97,13 @@ export class AppComponent {
     <p>All the timelines are taken from the official WhatsApp group and are updated ASAP in the app as well. As we already have volunteers for each Masjid, we don't necessarily need those many admins for the app (i.e. timesheet used as a backend for this app). We need a few who can update the sheet based on inputs from the WhatsApp group.</p>
     <p>So the gist is - the WhatsApp group remains the app's main data source. I'll create a short video tutorial for the volunteers on how to update the sheet.</p>
     <p>Spoiler: It's nothing tricky - just adding the time in 24-hour format. The only thing is not to mess up the whole sheet while doing so. I will work on creating some backup system to avoid so, someday!</p>
+    <p>
+      <b>Version 2</b>
+      <i>December 31, 2024</i>
+    </p>
+    <hr style='background: lightgrey;'>
+    <p>This major update has many things - but the main focus was to generalize the app and not make it location specific such that other people can use it for their own locations.</p>
+    <p>Now you can add custom locations, with a link to a Google sheet with all the Jamaat time data. Refer the sheet of the default location (Kamptee) and copy it for your own location. <a href="https://docs.google.com/spreadsheets/d/1T6912yPUI3dCLB61f46TvxjcVB7UbWGP3BeaA43rkiE/edit?usp=sharing"> Sample Sheet </a></p>
     <p>— Shakeeb Ahmad</p>
       
       <h2>Links</h2>
@@ -92,10 +116,17 @@ export class AppComponent {
     switch (url) {
       case 'changelog':
         pageTitle = 'Changelog';
-        this.githubCommits.forEach((commit:any,i) => {
+        this.githubCommits.forEach((commit: any, i) => {
           htmlContent += `
-            <b>${i+1}. 
-              ${new Date(commit.commit.author.date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
+            <b>${i + 1}. 
+              ${new Date(commit.commit.author.date).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              })}
             </b>
           <br>
           <i style="margin-left:1rem">${commit.commit.message}</i>
@@ -207,44 +238,42 @@ export class AppComponent {
           type: 'text',
           placeholder: 'ID',
           value: location ? location.id : '',
-          disabled: isDefaultLocation
+          disabled: isDefaultLocation,
         },
         {
           name: 'name',
           type: 'text',
           placeholder: 'Name',
           value: location ? location.name : '',
-          disabled: isDefaultLocation
+          disabled: isDefaultLocation,
         },
         {
           name: 'latitude',
           type: 'text',
           placeholder: 'Latitude',
           value: location ? location.latitude : '',
-          disabled: isDefaultLocation
+          disabled: isDefaultLocation,
         },
         {
           name: 'longitude',
           type: 'text',
           placeholder: 'Longitude',
           value: location ? location.longitude : '',
-          disabled: isDefaultLocation
-
+          disabled: isDefaultLocation,
         },
         {
           name: 'url1',
           type: 'text',
           placeholder: 'Data URL (URL 1)',
           value: location ? location.url1 : '',
-          disabled: isDefaultLocation
-
+          disabled: isDefaultLocation,
         },
         {
           name: 'url2',
           type: 'text',
-          placeholder: 'Backup Data URL (URL 2), incase url1 doesn\'t work',
+          placeholder: "Backup Data URL (URL 2), incase url1 doesn't work",
           value: location ? location.url2 : '',
-          disabled: isDefaultLocation
+          disabled: isDefaultLocation,
         },
       ],
       buttons: [
@@ -286,7 +315,7 @@ export class AppComponent {
   async deleteLocation(location: LocationListType) {
     // Prevent deletion of the default location
     if (location.id === this.DEFAULT_LOCATION) return;
-    const index = this.locations.findIndex(l => l.id === location.id);
+    const index = this.locations.findIndex((l) => l.id === location.id);
     const alert = await this.alertController.create({
       header: 'Confirm',
       message: 'Are you sure you want to delete this location?',
@@ -301,7 +330,9 @@ export class AppComponent {
             if (index !== -1) {
               this.locations.splice(index, 1);
               const selectedIndex = Math.max(index - 1, 0);
-              this.mService.selectedLocation$.next(this.locations[selectedIndex]);
+              this.mService.selectedLocation$.next(
+                this.locations[selectedIndex]
+              );
               this.mService.saveLocations();
             }
           },
@@ -311,5 +342,4 @@ export class AppComponent {
 
     await alert.present();
   }
-
 }

@@ -1,6 +1,6 @@
 {
-  "name": "Salah Time - Kamptee",
-  "short_name": "Salah-KMT",
+  "name": "Jamaat Time (YAST) - Yet Another Salah Time",
+  "short_name": "Jamaat Time",
   "theme_color": "#fff",
   "background_color": "#ffc409",
   "display": "standalone",
@@ -60,7 +60,13 @@
     {
       "name": "About",
       "url": "/info/help",
-      "description": "About the app and the developer"
+      "description": "About the app and the developer",
+      "icons": [
+        {
+          "src": "assets/info192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

@@ -1,3 +1,5 @@
+export const SCRIPT_ENDPOINT =
+  'https://script.google.com/macros/s/AKfycbxx1bALccf61Jz-wanrN5GRAtKvuMNmD74CO5GCWI0Mq4v-I_qFqg_lSxlvQXMbF3Y/exec';
 export interface Masjid {
   masjid: string;
   fajr: string;
